@@ -1,28 +1,28 @@
-import GLib from '@gi-types/glib2';
-import { imports } from 'gnome-shell';
-import { AllSettingsKeys, GioSettings, PinchGestureType } from './common/settings';
-import * as Constants from './constants';
-import { AltTabConstants, ExtSettings, TouchpadConstants } from './constants';
-import { AltTabGestureExtension } from './src/altTab';
-import { ForwardBackGestureExtension } from './src/forwardBack';
-import { GestureExtension } from './src/gestures';
-import { OverviewRoundTripGestureExtension } from './src/overviewRoundTrip';
-import { CloseWindowExtension } from './src/pinchGestures/closeWindow';
-import { ShowDesktopExtension } from './src/pinchGestures/showDesktop';
-import { SnapWindowExtension } from './src/snapWindow';
-import * as DBusUtils from './src/utils/dbus';
-import * as VKeyboard from './src/utils/keyboard';
+import GLib from 'gi://GLib';
+import { GioSettings, PinchGestureType, SettingKeys, AppForwardBackKeyBinds } from './common/settings.js';
+import * as Constants from './constants.js';
+import { AltTabConstants, ExtSettings, TouchpadConstants } from './constants.js';
+import { AltTabGestureExtension } from './src/altTab.js';
+import { ForwardBackGestureExtension } from './src/forwardBack.js';
+import { GestureExtension } from './src/gestures.js';
+import { OverviewRoundTripGestureExtension } from './src/overviewRoundTrip.js';
+import { CloseWindowExtension } from './src/pinchGestures/closeWindow.js';
+import { ShowDesktopExtension } from './src/pinchGestures/showDesktop.js';
+import { SnapWindowExtension } from './src/snapWindow.js';
+import * as DBusUtils from './src/utils/dbus.js';
+import * as VKeyboard from './src/utils/keyboard.js';
 
-const ExtensionUtils = imports.misc.extensionUtils;
+import { Extension, ExtensionMetadata } from 'resource:///org/gnome/shell/extensions/extension.js';
 
-class Extension {
+export default class extends Extension {
 	private _extensions: ISubExtension[];
 	settings?: GioSettings;
 	private _settingChangedId = 0;
 	private _reloadWaitId = 0;
-	private _addReloadDelayFor: AllSettingsKeys[];
+	private _addReloadDelayFor: SettingKeys[];
 
-	constructor() {
+	constructor(metadata: ExtensionMetadata) {
+		super(metadata);
 		this._extensions = [];
 		this._addReloadDelayFor = [
 			'touchpad-speed-scale',
@@ -32,7 +32,7 @@ class Extension {
 	}
 
 	enable() {
-		this.settings = ExtensionUtils.getSettings();
+		this.settings = this.getSettings() as GioSettings;
 		this._settingChangedId = this.settings.connect('changed', this.reload.bind(this));
 		this._enable();
 	}
@@ -51,7 +51,7 @@ class Extension {
 		DBusUtils.drop_proxy();
 	}
 
-	reload(_settings: never, key: AllSettingsKeys) {
+	reload(_settings: unknown, key: SettingKeys) {
 		if (this._reloadWaitId !== 0) {
 			GLib.source_remove(this._reloadWaitId);
 			this._reloadWaitId = 0;
@@ -79,7 +79,7 @@ class Extension {
 			this._extensions.push(new AltTabGestureExtension());
 		
 		if (this.settings.get_boolean('enable-forward-back-gesture')) {
-			const appForwardBackKeyBinds = this.settings.get_value('forward-back-application-keyboard-shortcuts').deepUnpack();
+			const appForwardBackKeyBinds = this.settings.get_value('forward-back-application-keyboard-shortcuts').deepUnpack<AppForwardBackKeyBinds>();
 			this._extensions.push(new ForwardBackGestureExtension(appForwardBackKeyBinds));
 		}
 
@@ -149,8 +149,4 @@ class Extension {
 
 		return gestureToFingersMap;
 	}
-}
-
-export function init(): IExtension {
-	return new Extension();
 }

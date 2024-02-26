@@ -1,14 +1,12 @@
-import Clutter from '@gi-types/clutter';
-import GObject from '@gi-types/gobject2';
-import Meta from '@gi-types/meta';
-import Shell from '@gi-types/shell';
-import { CustomEventType, global, imports } from 'gnome-shell';
-import { registerClass } from '../common/utils/gobject';
-import { TouchpadConstants } from '../constants';
-import * as DBusUtils from './utils/dbus';
+import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
 
-const Main = imports.ui.main;
-const { SwipeTracker } = imports.ui.swipeTracker;
+import { TouchpadConstants } from '../constants.js';
+import * as DBusUtils from './utils/dbus.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import { SwipeTracker } from 'resource:///org/gnome/shell/ui/swipeTracker.js';
 
 // define enum
 enum TouchpadState {
@@ -18,7 +16,7 @@ enum TouchpadState {
 	IGNORED = 3,
 }
 
-export const TouchpadSwipeGesture = registerClass({
+export const TouchpadSwipeGesture = GObject.registerClass({
 	Properties: {
 		'enabled': GObject.ParamSpec.boolean(
 			'enabled',
@@ -32,6 +30,7 @@ export const TouchpadSwipeGesture = registerClass({
 			'orientation',
 			'orientation',
 			GObject.ParamFlags.READWRITE,
+			// @ts-expect-error `Clutter.Orientation` is not assignable to `GObject.GType`
 			Clutter.Orientation,
 			Clutter.Orientation.HORIZONTAL,
 		),
@@ -247,7 +246,7 @@ export const TouchpadSwipeGesture = registerClass({
 	}
 });
 
-declare type _SwipeTrackerOptionalParams = {
+type _SwipeTrackerOptionalParams = {
 	allowTouch?: boolean,
 	allowDrag?: boolean,
 	allowScroll?: boolean,

@@ -1,20 +1,19 @@
-import Clutter from '@gi-types/clutter';
-import GObject from '@gi-types/gobject2';
-import Shell from '@gi-types/shell';
-import { CustomEventType, global, imports, __shell_private_types } from 'gnome-shell';
-import { ExtSettings, OverviewControlsState } from '../constants';
-import { createSwipeTracker, TouchpadSwipeGesture } from './swipeTracker';
+import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
+import Shell from 'gi://Shell';
 
-const Main = imports.ui.main;
+import { ExtSettings, OverviewControlsState } from '../constants.js';
+import { createSwipeTracker, TouchpadSwipeGesture } from './swipeTracker.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-declare interface ShallowSwipeTrackerT {
+interface ShallowSwipeTrackerT {
 	orientation: Clutter.Orientation,
 	confirmSwipe(distance: number, snapPoints: number[], currentProgress: number, cancelProgress: number): void;
 }
 
-declare type SwipeTrackerT = imports.ui.swipeTracker.SwipeTracker;
-declare type TouchPadSwipeTrackerT = Required<imports.ui.swipeTracker.SwipeTracker>['_touchpadGesture'];
-declare interface ShellSwipeTracker {
+type SwipeTrackerT = import('resource:///org/gnome/shell/ui/swipeTracker.js').SwipeTracker;
+type TouchPadSwipeTrackerT = Required<SwipeTrackerT>['_touchpadGesture'];
+interface ShellSwipeTracker {
 	swipeTracker: SwipeTrackerT,
 	nfingers: number[],
 	disableOldGesture: boolean,
@@ -49,7 +48,7 @@ abstract class SwipeTrackerEndPointsModifer {
 		this._swipeTracker.connect('end', this._gestureEnd.bind(this));
 	}
 
-	protected abstract _gestureBegin(tracker: SwipeTrackerT, monitor: never): void;
+	protected abstract _gestureBegin(tracker: SwipeTrackerT, monitor: unknown): void;
 	protected abstract _gestureUpdate(tracker: SwipeTrackerT, progress: number): void;
 	protected abstract _gestureEnd(tracker: SwipeTrackerT, duration: number, progress: number): void;
 
@@ -76,10 +75,10 @@ abstract class SwipeTrackerEndPointsModifer {
 }
 
 class WorkspaceAnimationModifier extends SwipeTrackerEndPointsModifer {
-	private _workspaceAnimation: imports.ui.workspaceAnimation.WorkspaceAnimationController;
+	private _workspaceAnimation: import('resource:///org/gnome/shell/ui/workspaceAnimation.js').WorkspaceAnimationController;
 	protected _swipeTracker: SwipeTrackerT;
 
-	constructor(wm: typeof imports.ui.main.wm) {
+	constructor(wm: typeof import('resource:///org/gnome/shell/ui/main.js').wm) {
 		super();
 		this._workspaceAnimation = wm._workspaceAnimation;
 		this._swipeTracker = createSwipeTracker(
@@ -134,7 +133,7 @@ class WorkspaceAnimationModifier extends SwipeTrackerEndPointsModifer {
 }
 
 export class GestureExtension implements ISubExtension {
-	private _stateAdjustment: imports.ui.overviewControls.OverviewAdjustment;
+	private _stateAdjustment: import('resource:///org/gnome/shell/ui/overviewControls.js').OverviewAdjustment;
 	private _swipeTrackers: ShellSwipeTracker[];
 	private _workspaceAnimationModifier: WorkspaceAnimationModifier;
 

@@ -1,36 +1,27 @@
 {
     "compilerOptions": {
         "strict": true,
-        "typeRoots": [
-            "./node_modules/@types",
-            "./node_modules/@gi-types"
-        ],
         "types": [
-            "gjs-environment",
-            "base-types",
-            "gtk4-types",
-            "node"
+            "./types/patches.d.ts",
         ],
         "lib": [
-            "ES2019"
+            "ES2022"
         ],
         "allowSyntheticDefaultImports": true,
         "rootDir": "./",
         "outDir": "./build",
-        "target": "ES6",
-        "moduleResolution": "Node",
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "skipLibCheck": true,
-        "paths": {
-          "gnome-shell": [
-            "./gnome-shell"
-          ]
-        },
     },
     "include": [
-      "extension/**/*.ts",
-      "extension/**/*.js",
-      "scripts/**/*.ts",
-      "gnome-shell/*.d.ts",
-      "tests/**/*.ts"
+        "types/global.d.ts",
+        "extension/**/*.ts",
+        "extension/**/*.js",
+        "tests/**/*.ts",
+    ],
+    "references": [
+        { "path": "./scripts/tsconfig.json" }
     ]
 }

@@ -1,19 +1,15 @@
-import Clutter from '@gi-types/clutter';
-import Shell from '@gi-types/shell';
-import Meta from '@gi-types/meta';
+import Clutter from 'gi://Clutter';
+import Shell from 'gi://Shell';
+import Meta from 'gi://Meta';
 
-import { imports, global } from 'gnome-shell';
+import { ExtSettings } from '../constants.js';
+import { ArrowIconAnimation } from './animations/arrow.js';
+import { createSwipeTracker } from './swipeTracker.js';
+import { getVirtualKeyboard, IVirtualKeyboard } from './utils/keyboard.js';
+import { ForwardBackKeyBinds, AppForwardBackKeyBinds } from '../common/settings.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import { SwipeTracker } from 'resource:///org/gnome/shell/ui/swipeTracker.js';
 
-import { ExtSettings } from '../constants';
-import { ArrowIconAnimation } from './animations/arrow';
-import { createSwipeTracker } from './swipeTracker';
-import { getVirtualKeyboard, IVirtualKeyboard } from './utils/keyboard';
-import { ForwardBackKeyBinds } from '../common/settings';
-
-const Main = imports.ui.main;
-declare type SwipeTrackerT = imports.ui.swipeTracker.SwipeTracker;
-
-// declare enum
 enum AnimationState {
 	WAITING = 0, // waiting to cross threshold
 	DEFAULT = WAITING,
@@ -21,7 +17,6 @@ enum AnimationState {
 	RIGHT = 1,
 }
 
-// declare enum
 enum SwipeGestureDirection {
 	LeftToRight = 1,
 	RightToLeft = 2,
@@ -29,11 +24,9 @@ enum SwipeGestureDirection {
 
 const SnapPointThreshold = 0.1;
 
-type AppForwardBackKeyBinds = Record<string, [ForwardBackKeyBinds, boolean]>;
-
 export class ForwardBackGestureExtension implements ISubExtension {
 	private _connectHandlers: number[];
-	private _swipeTracker: SwipeTrackerT;
+	private _swipeTracker: SwipeTracker;
 	private _keyboard: IVirtualKeyboard;
 	private _arrowIconAnimation: typeof ArrowIconAnimation.prototype;
 	private _animationState = AnimationState.WAITING;
@@ -75,20 +68,20 @@ export class ForwardBackGestureExtension implements ISubExtension {
 	}
 
 
-	_gestureBegin(tracker: SwipeTrackerT): void {
+	_gestureBegin(tracker: SwipeTracker): void {
 		this._focusWindow = global.display.get_focus_window() as Meta.Window | null;
 		if (!this._focusWindow)
 			return;
 		this._animationState = AnimationState.WAITING;
 		tracker.confirmSwipe(
-			global.screen_width,
+			global.screenWidth,
 			[AnimationState.LEFT, AnimationState.DEFAULT, AnimationState.RIGHT],
 			AnimationState.DEFAULT,
 			AnimationState.DEFAULT,
 		);
 	}
 
-	_gestureUpdate(_tracker: SwipeTrackerT, progress: number): void {
+	_gestureUpdate(_tracker: SwipeTracker, progress: number): void {
 		switch (this._animationState) {
 			case AnimationState.WAITING:
 				if (Math.abs(progress - AnimationState.DEFAULT) < SnapPointThreshold) return;
@@ -104,7 +97,7 @@ export class ForwardBackGestureExtension implements ISubExtension {
 		}
 	}
 
-	_gestureEnd(_tracker: SwipeTrackerT, duration: number, progress: AnimationState): void {
+	_gestureEnd(_tracker: SwipeTracker, duration: number, progress: AnimationState): void {
 		if (this._animationState === AnimationState.WAITING) {
 			if (progress === AnimationState.DEFAULT) return;
 			this._showArrow(progress);
@@ -154,14 +147,14 @@ export class ForwardBackGestureExtension implements ISubExtension {
 		const window = this._focusWindow;
 		if (window)
 			return window.get_frame_rect();
-		return Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.currentMonitor.index);
+		return Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.currentMonitor?.index ?? 0);
 	}
 
 	/**
 	 * @param gestureDirection direction of swipe gesture left to right or right to left
 	 */
 	_getClutterKeyForFocusedApp(gestureDirection: SwipeGestureDirection) {
-		const focusApp = this._windowTracker.focus_app as Shell.App | null;
+		const focusApp = this._windowTracker.focusApp as Shell.App | null;
 		const keyBind = focusApp ? this._appForwardBackKeyBinds[focusApp.get_id()] : null;
 
 		if (keyBind) {

@@ -1,18 +1,16 @@
-import Clutter from '@gi-types/clutter';
-import Meta from '@gi-types/meta';
-import Shell from '@gi-types/shell';
-import St from '@gi-types/st';
+import Clutter from 'gi://Clutter';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+import St from 'gi://St';
 
-import { global, imports } from 'gnome-shell';
+import { PinchGestureType } from '../../common/settings.js';
+import { WIGET_SHOWING_DURATION } from '../../constants.js';
+import { TouchpadPinchGesture } from '../trackers/pinchTracker.js';
+import { easeActor } from '../utils/environment.js';
+import { getVirtualKeyboard, IVirtualKeyboard } from '../utils/keyboard.js';
 
-import { PinchGestureType } from '../../common/settings';
-import { WIGET_SHOWING_DURATION } from '../../constants';
-import { TouchpadPinchGesture } from '../trackers/pinchTracker';
-import { easeActor } from '../utils/environment';
-import { getVirtualKeyboard, IVirtualKeyboard } from '../utils/keyboard';
-
-const Main = imports.ui.main;
-const Util = imports.misc.util;
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 
 const END_OPACITY = 0;
 const END_SCALE = 0.5;
@@ -22,7 +20,7 @@ enum CloseWindowGestureState {
 	DEFAULT = 0,
 }
 
-declare type Type_TouchpadPinchGesture = typeof TouchpadPinchGesture.prototype;
+type Type_TouchpadPinchGesture = typeof TouchpadPinchGesture.prototype;
 
 export class CloseWindowExtension implements ISubExtension {
 	private _closeType: PinchGestureType.CLOSE_DOCUMENT | PinchGestureType.CLOSE_WINDOW;
@@ -37,7 +35,7 @@ export class CloseWindowExtension implements ISubExtension {
 
 		this._preview = new St.Widget({
 			reactive: false,
-			style_class: 'gie-close-window-preview',
+			styleClass: 'gie-close-window-preview',
 			visible: false,
 		});
 		this._preview.set_pivot_point(0.5, 0.5);

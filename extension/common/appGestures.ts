@@ -1,14 +1,13 @@
-import Gtk from '@gi-types/gtk4';
-import Gio from '@gi-types/gio2';
-import GLib from '@gi-types/glib2';
-import GObject from '@gi-types/gobject2';
-import Adw from '@gi-types/adw1';
-import { ForwardBackKeyBinds, GioSettings } from './settings';
-import { registerClass } from './utils/gobject';
-import { printStack } from './utils/logging';
+import Gtk from 'gi://Gtk';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Adw from 'gi://Adw';
+import { ForwardBackKeyBinds, GioSettings } from './settings.js';
+import { printStack } from './utils/logging.js';
 
 /** return icon image for give app */
-function getAppIconImage(app: Gio.AppInfoPrototype) {
+function getAppIconImage(app: Gio.AppInfo) {
 	const iconName =  app.get_icon()?.to_string() ?? 'icon-missing';
 	return new Gtk.Image({
 		gicon: Gio.icon_new_for_string(iconName),
@@ -33,7 +32,7 @@ function markup_escape_text(text?: string | null) {
 /** Dialog window used for selecting application from given list of apps
  *  Emits `app-selected` signal with application id
  */
-const AppChooserDialog = registerClass(
+const AppChooserDialog = GObject.registerClass(
 	{
 		Properties: {},
 		Signals: { 'app-selected': { param_types: [GObject.TYPE_STRING] } },
@@ -45,7 +44,7 @@ const AppChooserDialog = registerClass(
 		 * @param apps list of apps to display in dialog
 		 * @param parent parent window, dialog will be transient for parent
 		 */
-		constructor(apps: Gio.AppInfoPrototype[], parent: Adw.Window) {
+		constructor(apps: Gio.AppInfo[], parent: Adw.Window) {
 			super({
 				modal: true,
 				transientFor: parent,
@@ -67,7 +66,7 @@ const AppChooserDialog = registerClass(
 		}
 
 		/** for given app add row to selectable list */
-		private _addAppRow(app: Gio.AppInfoPrototype) {
+		private _addAppRow(app: Gio.AppInfo) {
 			const row = new Adw.ActionRow({
 				title: markup_escape_text(app.get_display_name()),
 				subtitle: markup_escape_text(app.get_description()),
@@ -85,14 +84,14 @@ const AppChooserDialog = registerClass(
 );
 
 /** type definition for gesture setting(keybind and reverse flag) for app */
-declare type AppGestureSettings = [ForwardBackKeyBinds, boolean];
+type AppGestureSettings = [ForwardBackKeyBinds, boolean];
 
 /**
  * Class to create row for application in list to display gesture settings of app
  * Emits 'value-updated' when any of settings changes
  * Emits 'remove-request' when remove button is clicked
  */
-const AppGestureSettingsRow = registerClass(
+const AppGestureSettingsRow = GObject.registerClass(
 	{
 		Properties: {},
 		Signals: {
@@ -108,7 +107,7 @@ const AppGestureSettingsRow = registerClass(
 		 * @param appGestureSettings value of current settings for app
 		 * @param model list of choices of keybings for setting
 		 */
-		constructor(app: Gio.AppInfoPrototype, appGestureSettings: AppGestureSettings, model: Gio.ListModel) {
+		constructor(app: Gio.AppInfo, appGestureSettings: AppGestureSettings, model: Gio.ListModel) {
 			super({ title: markup_escape_text(app.get_display_name())});
 			this.add_prefix(getAppIconImage(app));
 
@@ -160,14 +159,14 @@ const AppGestureSettingsRow = registerClass(
 /**
  * Class to display list of applications and their gesture settings
  */
-const AppKeybindingGesturePrefsGroup = registerClass(
+const AppKeybindingGesturePrefsGroup = GObject.registerClass(
 	class GIE_AppKeybindingGesturePrefsGroup extends Adw.PreferencesGroup {
 		private _settings: GioSettings;
 		private _prefsWindow: Adw.PreferencesWindow;
 		private _appRows: Map<string, typeof AppGestureSettingsRow.prototype>;
 		private _cachedSettings: Record<string, AppGestureSettings>;
 		private _addAppButtonRow: Adw.PreferencesRow;
-		private _appGestureModel: Gtk.StringList<GObject.Object>;
+		private _appGestureModel: Gtk.StringList;
 
 		/**
 		 * @param prefsWindow parent preferences window

@@ -1,5 +1,5 @@
-import Gio from '@gi-types/gio2';
-import GLib from '@gi-types/glib2';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 
 // define enum
 export enum PinchGestureType {
@@ -25,7 +25,9 @@ export enum ForwardBackKeyBinds {
     'Tab Next/Prev' = 5,
 }
 
-export type BooleanSettingsKeys =
+export type AppForwardBackKeyBinds = Record<string, [ForwardBackKeyBinds, boolean]>;
+
+export type BooleanSettings =
     'default-session-workspace' |
     'default-overview' |
     'allow-minimize-window' |
@@ -36,72 +38,38 @@ export type BooleanSettingsKeys =
     'default-overview-gesture-direction'
     ;
 
-export type IntegerSettingsKeys =
+export type IntegerSettings =
     'alttab-delay' |
     'hold-swipe-delay-duration'
     ;
-export type DoubleSettingsKeys =
+
+export type DoubleSettings =
     'touchpad-speed-scale' |
     'touchpad-pinch-speed'
     ;
 
-export type EnumSettingsKeys =
-    'pinch-3-finger-gesture' |
-    'pinch-4-finger-gesture' |
-    'overview-navifation-states'
-    ;
-
-export type MiscSettingsKeys = 
-    'forward-back-application-keyboard-shortcuts'
-    ;
-
-export type AllSettingsKeys =
-    BooleanSettingsKeys |
-    IntegerSettingsKeys |
-    DoubleSettingsKeys |
-    EnumSettingsKeys |
-    MiscSettingsKeys
-    ;
-
-export type UIPageObjectIds = 
-    'gestures_page' |
-    'customizations_page'
-    ;
-
-export type AllUIObjectKeys =
-    UIPageObjectIds |
-    AllSettingsKeys |
-    'touchpad-speed-scale_display-value' |
-    'touchpad-pinch-speed_display-value'
-    ;
-
-type Enum_Functions<K extends EnumSettingsKeys, T> = {
-    get_enum(key: K): T;
-    set_enum(key: K, value: T): void;
+export type EnumSettings = {
+    'pinch-3-finger-gesture': PinchGestureType,
+    'pinch-4-finger-gesture': PinchGestureType,
+    'overview-navifation-states': OverviewNavigationState,
 }
 
-type SettingsEnumFunctions =
-    Enum_Functions<'pinch-3-finger-gesture' | 'pinch-4-finger-gesture', PinchGestureType> &
-    Enum_Functions<'overview-navifation-states', OverviewNavigationState>
-    ;
-
-type Misc_Functions<K extends MiscSettingsKeys, T extends string> = {
-    get_value(key: K): GLib.Variant<T>;
-    set_value(key: K, value: GLib.Variant<T>): void;
+export type MiscSettings = {
+    'forward-back-application-keyboard-shortcuts': ForwardBackKeyBinds,
 }
 
-type SettingsMiscFunctions = 
-    Misc_Functions<'forward-back-application-keyboard-shortcuts', 'a{s(ib)}'>
-    ;
+export type SettingKeys = BooleanSettings | IntegerSettings | DoubleSettings | keyof EnumSettings | keyof MiscSettings;
 
-export type GioSettings =
-    Omit<Gio.Settings, KeysThatStartsWith<keyof Gio.Settings, 'get_' | 'set_'>> &
-    {
-        get_boolean(key: BooleanSettingsKeys): boolean;
-        get_int(key: IntegerSettingsKeys): number;
-        get_double(key: DoubleSettingsKeys): number;
-        set_double(key: DoubleSettingsKeys, value: number): void;
-    } &
-    SettingsEnumFunctions &
-    SettingsMiscFunctions
-    ;
+export interface GioSettings extends Gio.Settings {
+    get_boolean(key: BooleanSettings): boolean;
+    set_boolean(key: BooleanSettings, value: boolean): boolean;
+    get_int(key: IntegerSettings): number;
+    set_int(key: IntegerSettings, value: number): boolean;
+    get_double(key: DoubleSettings): number;
+    set_double(key: DoubleSettings, value: number): boolean;
+    get_enum<K extends keyof EnumSettings>(key: K): EnumSettings[K];
+    set_enum<K extends keyof EnumSettings>(key: K, value: EnumSettings[K]): boolean;
+    // TODO: maybe stronger typing?
+    get_value<K extends keyof MiscSettings>(key: K): GLib.Variant;
+    set_value<K extends keyof MiscSettings>(key: K, value: GLib.Variant): boolean;
+}

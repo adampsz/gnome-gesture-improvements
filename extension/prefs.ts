@@ -1,17 +1,14 @@
-// import Gtk from '@gi-types/gtk4';
-import Adw from '@gi-types/adw1';
+import Adw from 'gi://Adw';
 
-import { imports } from 'gnome-shell';
-import { buildPrefsWidget } from './common/prefs';
+import { buildPrefsWidget } from './common/prefs.js';
+import { GioSettings } from './common/settings.js';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const ExtMe = ExtensionUtils.getCurrentExtension();
+import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export function init(): void { }
-
-export function fillPreferencesWindow(prefsWindow: Adw.PreferencesWindow) {
-	const UIDirPath = ExtMe.dir.get_child('ui').get_path() ?? '';
-	const settings = ExtensionUtils.getSettings();
-	buildPrefsWidget(prefsWindow, settings, UIDirPath);
+export default class extends ExtensionPreferences {
+	fillPreferencesWindow(prefsWindow: Adw.PreferencesWindow) {
+		const UIDirPath = this.dir.get_child('ui').get_path() ?? '';
+		const settings = this.getSettings();
+		buildPrefsWidget(prefsWindow, settings as GioSettings, UIDirPath);
+	}
 }

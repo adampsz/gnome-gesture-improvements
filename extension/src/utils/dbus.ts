@@ -1,11 +1,10 @@
-import Clutter from '@gi-types/clutter';
-import Gio from '@gi-types/gio2';
-import GObject from '@gi-types/gobject2';
-import { CustomEventType, global, imports } from 'gnome-shell';
-import { registerClass } from '../../common/utils/gobject';
-import { printStack } from '../../common/utils/logging';
+import Clutter from 'gi://Clutter';
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
 
-const Util = imports.misc.util;
+import { printStack } from '../../common/utils/logging.js';
+
+import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 
 const X11GestureDaemonXml = `<node>
 	<interface name="org.gestureImprovements.gestures">
@@ -21,7 +20,7 @@ const X11GestureDaemonXml = `<node>
 	</interface>
 </node>`;
 
-const DBusWrapperGIExtension = registerClass({
+const DBusWrapperGIExtension = GObject.registerClass({
 	Signals: {
 		'TouchpadSwipe': {
 			param_types: [
@@ -65,7 +64,7 @@ const DBusWrapperGIExtension = registerClass({
 		super();
 
 		const ProxyClass = Gio.DBusProxy.makeProxyWrapper(X11GestureDaemonXml);
-		this._proxy = new ProxyClass(
+		this._proxy = ProxyClass(
 			Gio.DBus.session,
 			'org.gestureImprovements.gestures',
 			'/org/gestureImprovements/gestures',

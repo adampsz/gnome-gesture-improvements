@@ -1,13 +1,12 @@
-import Clutter from '@gi-types/clutter';
-import GObject from '@gi-types/gobject2';
-import Meta from '@gi-types/meta';
-import Shell from '@gi-types/shell';
-import { CustomEventType, global, imports } from 'gnome-shell';
-import { registerClass } from '../../common/utils/gobject';
-import { TouchpadConstants } from '../../constants';
-import * as DBusUtils from '../utils/dbus';
+import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
 
-const Main = imports.ui.main;
+import { TouchpadConstants } from '../../constants.js';
+
+import * as DBusUtils from '../utils/dbus.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 const MIN_ANIMATION_DURATION = 100;
 const MAX_ANIMATION_DURATION = 400;
@@ -21,7 +20,7 @@ const DECELERATION_TOUCHPAD = 0.997;
 const VELOCITY_CURVE_THRESHOLD = 2;
 const DECELERATION_PARABOLA_MULTIPLIER = 0.35;
 
-declare type HisotyEvent = { time: number, delta: number };
+type HisotyEvent = { time: number, delta: number };
 
 class EventHistoryTracker {
 	private _data: HisotyEvent[] = [];
@@ -72,7 +71,7 @@ enum GestureACKState {
 	ACKED = 2,
 }
 
-export const TouchpadPinchGesture = registerClass({
+export const TouchpadPinchGesture = GObject.registerClass({
 	Properties: {},
 	Signals: {
 		'begin': { param_types: [] },

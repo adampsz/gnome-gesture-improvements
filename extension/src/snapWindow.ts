@@ -1,19 +1,18 @@
-import Clutter from '@gi-types/clutter';
-import Meta from '@gi-types/meta';
-import Shell from '@gi-types/shell';
-import St from '@gi-types/st';
-import { global, imports } from 'gnome-shell';
-import { registerClass } from '../common/utils/gobject';
-import { ExtSettings } from '../constants';
-import { createSwipeTracker, TouchpadSwipeGesture } from './swipeTracker';
-import { easeActor, easeAdjustment } from './utils/environment';
-import { getVirtualKeyboard, IVirtualKeyboard } from './utils/keyboard';
+import Clutter from 'gi://Clutter';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+import St from 'gi://St';
+import GObject from 'gi://GObject';
+import Mtk from 'gi://Mtk';
 
+import { ExtSettings } from '../constants.js';
+import { createSwipeTracker, TouchpadSwipeGesture } from './swipeTracker.js';
+import { easeActor, easeAdjustment } from './utils/environment.js';
+import { getVirtualKeyboard, IVirtualKeyboard } from './utils/keyboard.js';
 
-const Main = imports.ui.main;
-const Utils = imports.misc.util;
-
-const { SwipeTracker } = imports.ui.swipeTracker;
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as Utils from 'resource:///org/gnome/shell/misc/util.js';
+import { SwipeTracker } from 'resource:///org/gnome/shell/ui/swipeTracker.js';
 
 const WINDOW_ANIMATION_TIME = 250;
 const UPDATED_WINDOW_ANIMATION_TIME = 150;
@@ -34,24 +33,24 @@ enum GestureTileState {
 	LEFT_TILE = GestureMaxUnMaxState.MAXIMIZE,
 }
 
-const TilePreview = registerClass(
+const TilePreview = GObject.registerClass(
 	class TilePreview extends St.Widget {
 		private _adjustment: St.Adjustment;
 
 		private _window?: Meta.Window;
 		private _direction = Clutter.Orientation.VERTICAL;
-		private _normalBox?: Meta.Rectangle;
-		private _maximizeBox?: Meta.Rectangle;
-		private _minimizeBox?: Meta.Rectangle;
-		private _leftSnapBox?: Meta.Rectangle;
-		private _rightSnapBox?: Meta.Rectangle;
+		private _normalBox?: Mtk.Rectangle;
+		private _maximizeBox?: Mtk.Rectangle;
+		private _minimizeBox?: Mtk.Rectangle;
+		private _leftSnapBox?: Mtk.Rectangle;
+		private _rightSnapBox?: Mtk.Rectangle;
 		private _virtualDevice: IVirtualKeyboard;
-		private _fullscreenBox?: Meta.Rectangle;
+		private _fullscreenBox?: Mtk.Rectangle;
 
 		constructor() {
 			super({
 				reactive: false,
-				style_class: 'tile-preview',
+				styleClass: 'tile-preview',
 				visible: false,
 			});
 			this.add_style_class_name('gie-tile-window-preview');
@@ -107,8 +106,8 @@ const TilePreview = registerClass(
 						// Main.wm.skipNextEffect(this._window.get_compositor_private() as Meta.WindowActor);
 						const stSettings = St.Settings.get();
 						// speedup animations
-						const prevSlowdown = stSettings.slow_down_factor;
-						stSettings.slow_down_factor = UPDATED_WINDOW_ANIMATION_TIME / WINDOW_ANIMATION_TIME;
+						const prevSlowdown = stSettings.slowDownFactor;
+						stSettings.slowDownFactor = UPDATED_WINDOW_ANIMATION_TIME / WINDOW_ANIMATION_TIME;
 
 						switch (state) {
 							case GestureMaxUnMaxState.MINIMIZE:
@@ -129,7 +128,7 @@ const TilePreview = registerClass(
 								break;
 						}
 
-						stSettings.slow_down_factor = prevSlowdown;
+						stSettings.slowDownFactor = prevSlowdown;
 					}
 					// snap-left,normal,snap-right
 					else {
@@ -231,7 +230,7 @@ const TilePreview = registerClass(
 			return this._adjustment;
 		}
 
-		private getMinimizedBox(window: Meta.Window, monitorWorkArea: Meta.Rectangle) {
+		private getMinimizedBox(window: Meta.Window, monitorWorkArea: Mtk.Rectangle) {
 			const [has_icon, icon_geometry] = window.get_icon_geometry();
 			if (has_icon)
 				return icon_geometry;
@@ -370,7 +369,7 @@ export class SnapWindowExtension implements ISubExtension {
 		}
 	}
 
-	_gestureUpdate(_tracker: never, progress: number): void {
+	_gestureUpdate(_tracker: unknown, progress: number): void {
 		// log(`progress: ${progress}, toggled: ${this._toggledDirection}`);
 		if (this._toggledDirection) {
 			this._tilePreview.adjustment.value = progress;
@@ -391,7 +390,7 @@ export class SnapWindowExtension implements ISubExtension {
 		}
 	}
 
-	_gestureEnd(_tracker: never, duration: number, progress: number): void {
+	_gestureEnd(_tracker: unknown, duration: number, progress: number): void {
 		this._tilePreview.finish(duration, progress);
 	}
 }
