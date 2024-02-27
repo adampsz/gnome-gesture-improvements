@@ -1,67 +1,53 @@
 {
-    "$schema": "https://json.schemastore.org/eslintrc",
-    "env": {
-        "es2021": true
-    },
-    "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "ecmaVersion": 12,
-        "sourceType": "module"
-    },
-    "plugins": [
-        "@typescript-eslint"
-    ],
-    "rules": {
-        "no-var": "error",
-        "no-unused-expressions": "error",
-        "no-unused-labels": "error",
-        "no-unused-vars": "off",
-        "@typescript-eslint/no-unused-vars": [
-            "error",
-            {
-                "vars": "all",
-                "args": "all",
-                "varsIgnorePattern": "^_",
-                "argsIgnorePattern": "^_"
-            }
-        ],
-        "no-empty": "error",
-        "eqeqeq": "error"
-    },
-    "overrides": [
-        {
-            "files": [
-                "build/**/*.js",
-                "extension/**/*.js"
-            ],
-            "globals": {
-                "log": "readonly",
-                "global": "readonly",
-                "imports": "readonly",
-                "console": "readonly",
-                "process": "readonly",
-                "TextEncoder": "readonly",
-                "TextDecoder": "readonly"
-            },
-            "rules": {
-                "no-console": "off",
-                "no-var": "off",
-                "@typescript-eslint/no-unused-vars": "off",
-                "@typescript-eslint/explicit-module-boundary-types": "off",
-                "no-unused-expressions": "off"
-            }
-        },
-        {
-            "env": {
-                "node": true
-            },
-            "files": [
-                "scripts/**/*.ts"
-            ]
-        }
-    ]
+	"$schema": "https://json.schemastore.org/eslintrc",
+	"env": { "es2021": true },
+	"extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": 12,
+		"sourceType": "module"
+	},
+	"plugins": ["@typescript-eslint"],
+	"rules": {
+		"no-var": "error",
+		"no-unused-expressions": "error",
+		"no-unused-labels": "error",
+		"no-unused-vars": "off",
+		"@typescript-eslint/no-unused-vars": [
+			"error",
+			{
+				"vars": "all",
+				"args": "all",
+				"varsIgnorePattern": "^_",
+				"argsIgnorePattern": "^_"
+			}
+		],
+		"no-empty": "error",
+		"eqeqeq": "error"
+	},
+	"overrides": [
+		{
+			"files": ["build/**/*.js", "extension/**/*.js"],
+			"globals": {
+				"log": "readonly",
+				"global": "readonly",
+				"imports": "readonly",
+				"console": "readonly",
+				"process": "readonly",
+				"TextEncoder": "readonly",
+				"TextDecoder": "readonly"
+			},
+			"rules": {
+				"no-console": "off",
+				"no-var": "off",
+				"@typescript-eslint/no-unused-vars": "off",
+				"@typescript-eslint/explicit-module-boundary-types": "off",
+				"no-unused-expressions": "off"
+			}
+		},
+		{
+			"env": { "node": true },
+			"files": ["scripts/**/*.ts"]
+		}
+	]
 }
