@@ -11,59 +11,59 @@ declare module 'resource:///org/gnome/shell/misc/util.js' {
 }
 
 declare module 'resource:///org/gnome/shell/ui/main.js' {
-    import Shell from 'gi://Shell';
+	import Shell from 'gi://Shell';
 
 	export const actionMode: Shell.ActionMode;
 }
 
 declare module 'resource:///org/gnome/shell/ui/overviewControls.js' {
-    import Clutter from 'gi://Clutter';
-    import St from 'gi://St';
+	import Clutter from 'gi://Clutter';
+	import St from 'gi://St';
 
-    import { SwipeTracker } from 'resource:///org/gnome/shell/ui/swipeTracker.js';
+	import { SwipeTracker } from 'resource:///org/gnome/shell/ui/swipeTracker.js';
 
 	export enum ControlsState {
 		HIDDEN,
 		WINDOW_PICKER,
-		APP_GRID
+		APP_GRID,
 	}
 
 	export class OverviewAdjustment extends St.Adjustment {
 		getStateTransitionParams(): {
-			transitioning: boolean,
-			initialState: ControlsState,
-			finalState: ControlsState
-			currentState: number,
-			progress: number
-		}
+			transitioning: boolean;
+			initialState: ControlsState;
+			finalState: ControlsState;
+			currentState: number;
+			progress: number;
+		};
 	}
 
 	export class OverviewControlsManager extends St.Widget {
 		_stateAdjustment: OverviewAdjustment;
 		layoutManager: Clutter.BoxLayout & {
-			_searchEntry: St.Bin
+			_searchEntry: St.Bin;
 		};
 
-		_toggleAppsPage(): void
+		_toggleAppsPage(): void;
 
 		_workspacesDisplay: {
-			_swipeTracker: SwipeTracker
+			_swipeTracker: SwipeTracker;
 		};
 
 		_appDisplay: {
-			_swipeTracker: SwipeTracker
+			_swipeTracker: SwipeTracker;
 		};
 
 		_searchController: {
-			searchActive: boolean
+			searchActive: boolean;
 		};
 	}
 }
 
 declare module 'resource:///org/gnome/shell/ui/swipeTracker.js' {
-    import Clutter from 'gi://Clutter';
-    import Shell from 'gi://Shell';
-    import GObject from 'gi://GObject';
+	import Clutter from 'gi://Clutter';
+	import Shell from 'gi://Shell';
+	import GObject from 'gi://GObject';
 
 	export class TouchpadSwipeGesture extends GObject.Object {
 		destroy(): void;
@@ -76,7 +76,12 @@ declare module 'resource:///org/gnome/shell/ui/swipeTracker.js' {
 		orientation: Clutter.Orientation;
 		enabled: boolean;
 		allowLongSwipes: boolean;
-		confirmSwipe(distance: number, snapPoints: number[], currentProgress: number, cancelProgress: number): void;
+		confirmSwipe(
+			distance: number,
+			snapPoints: number[],
+			currentProgress: number,
+			cancelProgress: number,
+		): void;
 		destroy(): void;
 
 		_touchGesture?: Clutter.GestureAction;
@@ -97,17 +102,20 @@ declare module 'resource:///org/gnome/shell/ui/swipeTracker.js' {
 }
 
 declare module 'resource:///org/gnome/shell/ui/workspaceAnimation.js' {
-    import Clutter from 'gi://Clutter';
-    import Meta from 'gi://Meta';
+	import Clutter from 'gi://Clutter';
+	import Meta from 'gi://Meta';
 
 	import { SwipeTracker } from 'resource:///org/gnome/shell/ui/swipeTracker.js';
 
 	export class WorkspaceAnimationController {
 		_swipeTracker: SwipeTracker;
-		_switchWorkspaceBegin(tracker: {
-			orientation: Clutter.Orientation,
-			confirmSwipe: typeof prototype.confirmSwipe
-		}, monitor: number);
+		_switchWorkspaceBegin(
+			tracker: {
+				orientation: Clutter.Orientation;
+				confirmSwipe: typeof prototype.confirmSwipe;
+			},
+			monitor: number,
+		);
 
 		_switchWorkspaceUpdate(tracker: SwipeTracker, progress: number);
 		_switchWorkspaceEnd(tracker: SwipeTracker, duration: number, progress: number);

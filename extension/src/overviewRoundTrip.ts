@@ -6,7 +6,10 @@ import { ExtSettings, OverviewControlsState } from '../constants.js';
 import { createSwipeTracker } from './swipeTracker.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { SwipeTracker } from 'resource:///org/gnome/shell/ui/swipeTracker.js';
-import { OverviewAdjustment, OverviewControlsManager } from 'resource:///org/gnome/shell/ui/overviewControls.js';
+import {
+	OverviewAdjustment,
+	OverviewControlsManager,
+} from 'resource:///org/gnome/shell/ui/overviewControls.js';
 
 enum ExtensionState {
 	// DISABLED = 0,
@@ -30,16 +33,18 @@ export class OverviewRoundTripGestureExtension {
 		this._navigationStates = navigationStates;
 		this._overviewControls = Main.overview._overview._controls;
 		this._stateAdjustment = this._overviewControls._stateAdjustment;
-		this._oldGetStateTransitionParams = this._overviewControls._stateAdjustment.getStateTransitionParams;
+		this._oldGetStateTransitionParams =
+			this._overviewControls._stateAdjustment.getStateTransitionParams;
 		this._progress = 0;
 		this._connectors = [];
 	}
 
-	_getStateTransitionParams(): ReturnType<OverviewAdjustment['getStateTransitionParams']> | undefined {
+	_getStateTransitionParams():
+		| ReturnType<OverviewAdjustment['getStateTransitionParams']>
+		| undefined {
 		if (this._extensionState <= ExtensionState.DEFAULT) {
 			return this._oldGetStateTransitionParams.call(this._stateAdjustment);
-		}
-		else if (this._extensionState === ExtensionState.CUSTOM) {
+		} else if (this._extensionState === ExtensionState.CUSTOM) {
 			const currentState = this._stateAdjustment.value;
 			const initialState = OverviewControlsState.HIDDEN;
 			const finalState = OverviewControlsState.APP_GRID;
@@ -62,7 +67,7 @@ export class OverviewRoundTripGestureExtension {
 
 		this._swipeTracker = createSwipeTracker(
 			global.stage,
-			(ExtSettings.DEFAULT_OVERVIEW_GESTURE ? [3] : [4]),
+			ExtSettings.DEFAULT_OVERVIEW_GESTURE ? [3] : [4],
 			Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
 			Clutter.Orientation.VERTICAL,
 			ExtSettings.DEFAULT_OVERVIEW_GESTURE_DIRECTION,
@@ -81,28 +86,40 @@ export class OverviewRoundTripGestureExtension {
 		this._progress = 0;
 
 		// reset extension state to default, when overview is shown and hidden (not showing/hidding event)
-		this._shownEventId = Main.overview.connect('shown', () => this._extensionState = ExtensionState.DEFAULT);
-		this._hiddenEventId = Main.overview.connect('hidden', () => this._extensionState = ExtensionState.DEFAULT);
-
+		this._shownEventId = Main.overview.connect(
+			'shown',
+			() => (this._extensionState = ExtensionState.DEFAULT),
+		);
+		this._hiddenEventId = Main.overview.connect(
+			'hidden',
+			() => (this._extensionState = ExtensionState.DEFAULT),
+		);
 	}
 
 	destroy(): void {
 		if (this._swipeTracker) {
-			this._connectors.forEach(connector => this._swipeTracker?.disconnect(connector));
+			this._connectors.forEach((connector) => this._swipeTracker?.disconnect(connector));
 			this._swipeTracker.destroy();
 			this._swipeTracker = undefined;
 		}
 		this._connectors = [];
 
 		Main.overview._swipeTracker.enabled = true;
-		this._stateAdjustment.getStateTransitionParams = this._oldGetStateTransitionParams.bind(this._stateAdjustment);
+		this._stateAdjustment.getStateTransitionParams = this._oldGetStateTransitionParams.bind(
+			this._stateAdjustment,
+		);
 		Main.overview.disconnect(this._shownEventId);
 		Main.overview.disconnect(this._hiddenEventId);
 	}
 
 	_gestureBegin(tracker: SwipeTracker): void {
 		const _tracker = {
-			confirmSwipe: (distance: number, _snapPoints: number[], currentProgress: number, cancelProgress: number) => {
+			confirmSwipe: (
+				distance: number,
+				_snapPoints: number[],
+				currentProgress: number,
+				cancelProgress: number,
+			) => {
 				tracker.confirmSwipe(
 					distance,
 					this._getGestureSnapPoints(),
@@ -118,11 +135,9 @@ export class OverviewRoundTripGestureExtension {
 	}
 
 	_gestureUpdate(tracker: SwipeTracker, progress: number): void {
-		if (progress < OverviewControlsState.HIDDEN ||
-			progress > OverviewControlsState.APP_GRID) {
+		if (progress < OverviewControlsState.HIDDEN || progress > OverviewControlsState.APP_GRID) {
 			this._extensionState = ExtensionState.CUSTOM;
-		}
-		else {
+		} else {
 			this._extensionState = ExtensionState.DEFAULT;
 		}
 
@@ -134,17 +149,17 @@ export class OverviewRoundTripGestureExtension {
 	_gestureEnd(tracker: SwipeTracker, duration: number, endProgress: number): void {
 		if (this._progress < OverviewControlsState.HIDDEN) {
 			this._extensionState = ExtensionState.CUSTOM;
-			endProgress = endProgress >= OverviewControlsState.HIDDEN ?
-				OverviewControlsState.HIDDEN :
-				OverviewControlsState.APP_GRID;
-		}
-		else if (this._progress > OverviewControlsState.APP_GRID) {
+			endProgress =
+				endProgress >= OverviewControlsState.HIDDEN
+					? OverviewControlsState.HIDDEN
+					: OverviewControlsState.APP_GRID;
+		} else if (this._progress > OverviewControlsState.APP_GRID) {
 			this._extensionState = ExtensionState.CUSTOM;
-			endProgress = endProgress <= OverviewControlsState.APP_GRID ?
-				OverviewControlsState.APP_GRID :
-				OverviewControlsState.HIDDEN;
-		}
-		else {
+			endProgress =
+				endProgress <= OverviewControlsState.APP_GRID
+					? OverviewControlsState.APP_GRID
+					: OverviewControlsState.HIDDEN;
+		} else {
 			this._extensionState = ExtensionState.DEFAULT;
 			endProgress = Math.clamp(
 				endProgress,
@@ -163,8 +178,7 @@ export class OverviewRoundTripGestureExtension {
 				OverviewControlsState.APP_GRID,
 				2 * Math.abs(OverviewControlsState.HIDDEN - progress),
 			);
-		}
-		else if (progress > OverviewControlsState.APP_GRID) {
+		} else if (progress > OverviewControlsState.APP_GRID) {
 			return Math.min(
 				OverviewControlsState.APP_GRID,
 				2 * Math.abs(OverviewControlsState.HIDDEN_N - progress),
@@ -191,10 +205,7 @@ export class OverviewRoundTripGestureExtension {
 					OverviewControlsState.APP_GRID,
 				];
 			case OverviewNavigationState.WINDOW_PICKER_ONLY:
-				return [
-					OverviewControlsState.HIDDEN,
-					OverviewControlsState.WINDOW_PICKER,
-				];
+				return [OverviewControlsState.HIDDEN, OverviewControlsState.WINDOW_PICKER];
 		}
 	}
 }

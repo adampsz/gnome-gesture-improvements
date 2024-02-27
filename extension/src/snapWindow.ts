@@ -95,12 +95,10 @@ const TilePreview = GObject.registerClass(
 		}
 
 		finish(duration: number, state: GestureMaxUnMaxState | GestureTileState): void {
-
 			const callback = () => {
-				if (!this.visible)
-					return;
+				if (!this.visible) return;
 
-				this.easeOpacity(0, () => this.visible = false);
+				this.easeOpacity(0, () => (this.visible = false));
 				if (this._window) {
 					// maximize-unmaximize
 					if (this._direction === Clutter.Orientation.VERTICAL) {
@@ -115,13 +113,11 @@ const TilePreview = GObject.registerClass(
 								this._window.minimize();
 								break;
 							case GestureMaxUnMaxState.UNMAXIMIZE:
-								if (this._window.is_fullscreen())
-									this._window.unmake_fullscreen();
+								if (this._window.is_fullscreen()) this._window.unmake_fullscreen();
 								this._window.unmaximize(Meta.MaximizeFlags.BOTH);
 								break;
 							case GestureMaxUnMaxState.MAXIMIZE:
-								if (this._window.is_fullscreen())
-									this._window.unmake_fullscreen();
+								if (this._window.is_fullscreen()) this._window.unmake_fullscreen();
 								this._window.maximize(Meta.MaximizeFlags.BOTH);
 								break;
 							case GestureMaxUnMaxState.FULLSCREEN:
@@ -134,8 +130,11 @@ const TilePreview = GObject.registerClass(
 					// snap-left,normal,snap-right
 					else {
 						if (state !== GestureTileState.NORMAL) {
-							const keys = [Clutter.KEY_Super_L, (state === GestureTileState.LEFT_TILE ? Clutter.KEY_Left : Clutter.KEY_Right)];
-							this._virtualDevice.sendKeys(keys);	
+							const keys = [
+								Clutter.KEY_Super_L,
+								state === GestureTileState.LEFT_TILE ? Clutter.KEY_Left : Clutter.KEY_Right,
+							];
+							this._virtualDevice.sendKeys(keys);
 						}
 					}
 				}
@@ -165,8 +164,7 @@ const TilePreview = GObject.registerClass(
 					startBox = this._minimizeBox;
 					endBox = this._normalBox;
 					progress -= GestureMaxUnMaxState.MINIMIZE;
-				}
-				else if (progress <= GestureMaxUnMaxState.MAXIMIZE) {
+				} else if (progress <= GestureMaxUnMaxState.MAXIMIZE) {
 					// no particular reason for equality here
 					startBox = this._normalBox;
 					endBox = this._maximizeBox;
@@ -176,8 +174,7 @@ const TilePreview = GObject.registerClass(
 					endBox = this._fullscreenBox;
 					progress -= GestureMaxUnMaxState.MAXIMIZE;
 				}
-			}
-			else {
+			} else {
 				startBox = this._normalBox;
 				if (progress >= GestureTileState.NORMAL) {
 					endBox = this._leftSnapBox;
@@ -221,8 +218,7 @@ const TilePreview = GObject.registerClass(
 				duration: UPDATED_WINDOW_ANIMATION_TIME,
 				mode: Clutter.AnimationMode.EASE_OUT_QUAD,
 				onStopped: () => {
-					if (callback)
-						callback();
+					if (callback) callback();
 				},
 			});
 		}
@@ -233,8 +229,7 @@ const TilePreview = GObject.registerClass(
 
 		private getMinimizedBox(window: Meta.Window, monitorWorkArea: Mtk.Rectangle) {
 			const [has_icon, icon_geometry] = window.get_icon_geometry();
-			if (has_icon)
-				return icon_geometry;
+			if (has_icon) return icon_geometry;
 
 			const rect = monitorWorkArea.copy();
 			rect.width = 0;
@@ -244,8 +239,7 @@ const TilePreview = GObject.registerClass(
 
 		private getNormalBox(window: Meta.Window) {
 			const normalBox = window.get_frame_rect();
-			if (window.get_maximized() !== Meta.MaximizeFlags.BOTH)
-				return normalBox;
+			if (window.get_maximized() !== Meta.MaximizeFlags.BOTH) return normalBox;
 
 			const [width, height] = [
 				Math.round(normalBox.width * 0.05),
@@ -261,8 +255,7 @@ const TilePreview = GObject.registerClass(
 		private getMaximizedBox(window: Meta.Window) {
 			const monitor = window.get_monitor();
 			const maximizedBox = Main.layoutManager.getWorkAreaForMonitor(monitor);
-			if (!window.is_fullscreen())
-				return maximizedBox;
+			if (!window.is_fullscreen()) return maximizedBox;
 
 			const height = Math.round(maximizedBox.height * 0.025);
 			maximizedBox.y += height;
@@ -282,15 +275,15 @@ export class SnapWindowExtension {
 	private _uiGroupAddedActorId: number;
 
 	constructor() {
-		const tracker = this._swipeTracker = createSwipeTracker(
+		const tracker = (this._swipeTracker = createSwipeTracker(
 			global.stage,
-			(ExtSettings.DEFAULT_OVERVIEW_GESTURE ? [4] : [3]),
+			ExtSettings.DEFAULT_OVERVIEW_GESTURE ? [4] : [3],
 			Shell.ActionMode.NORMAL,
 			Clutter.Orientation.VERTICAL,
 			true,
 			1,
 			{ allowTouch: false },
-		);
+		));
 
 		this._swipeTracker.allowLongSwipes = true;
 		this._touchpadSwipeGesture = tracker._touchpadGesture;
@@ -315,7 +308,7 @@ export class SnapWindowExtension {
 			this._uiGroupAddedActorId = 0;
 		}
 
-		this._connectors.forEach(connector => this._swipeTracker.disconnect(connector));
+		this._connectors.forEach((connector) => this._swipeTracker.disconnect(connector));
 		Main.layoutManager.uiGroup.remove_child(this._tilePreview);
 		this._swipeTracker.destroy();
 		this._tilePreview.destroy();
@@ -337,8 +330,11 @@ export class SnapWindowExtension {
 		const currentMonitor = window.get_monitor();
 		const monitorArea = global.display.get_monitor_geometry(currentMonitor);
 
-		const progress = window.is_fullscreen() ? GestureMaxUnMaxState.FULLSCREEN
-			: window.get_maximized() === Meta.MaximizeFlags.BOTH ? GestureMaxUnMaxState.MAXIMIZE : GestureMaxUnMaxState.UNMAXIMIZE;
+		const progress = window.is_fullscreen()
+			? GestureMaxUnMaxState.FULLSCREEN
+			: window.get_maximized() === Meta.MaximizeFlags.BOTH
+				? GestureMaxUnMaxState.MAXIMIZE
+				: GestureMaxUnMaxState.UNMAXIMIZE;
 
 		this._toggledDirection = false;
 		this._allowChangeDirection = false;
@@ -346,7 +342,11 @@ export class SnapWindowExtension {
 		const snapPoints: number[] = [];
 		switch (progress) {
 			case GestureMaxUnMaxState.UNMAXIMIZE:
-				snapPoints.push(GestureTileState.RIGHT_TILE, GestureTileState.NORMAL, GestureTileState.LEFT_TILE);
+				snapPoints.push(
+					GestureTileState.RIGHT_TILE,
+					GestureTileState.NORMAL,
+					GestureTileState.LEFT_TILE,
+				);
 				// allow tiling gesture, when window is unmaximized and minimized gesture is not enabled
 				this._allowChangeDirection = !ExtSettings.ALLOW_MINIMIZE_WINDOW;
 				break;
@@ -361,12 +361,7 @@ export class SnapWindowExtension {
 		}
 
 		if (this._tilePreview.open(window, progress)) {
-			tracker.confirmSwipe(
-				monitorArea.height,
-				snapPoints,
-				progress,
-				progress,
-			);
+			tracker.confirmSwipe(monitorArea.height, snapPoints, progress, progress);
 		}
 	}
 
@@ -382,7 +377,10 @@ export class SnapWindowExtension {
 			this._tilePreview.adjustment.value = progress;
 		}
 		// switch to horizontal
-		else if (this._allowChangeDirection && progress <= GestureMaxUnMaxState.UNMAXIMIZE - TRIGGER_THRESHOLD) {
+		else if (
+			this._allowChangeDirection &&
+			progress <= GestureMaxUnMaxState.UNMAXIMIZE - TRIGGER_THRESHOLD
+		) {
 			this._toggledDirection = true;
 			this._touchpadSwipeGesture.switchDirectionTo(Clutter.Orientation.HORIZONTAL);
 			this._swipeTracker._progress = GestureTileState.NORMAL;

@@ -27,7 +27,10 @@ export class CloseWindowExtension {
 	private _preview: St.Widget;
 	private _focusWindow?: Meta.Window | null;
 
-	constructor(nfingers: number[], closeType: PinchGestureType.CLOSE_DOCUMENT | PinchGestureType.CLOSE_WINDOW) {
+	constructor(
+		nfingers: number[],
+		closeType: PinchGestureType.CLOSE_DOCUMENT | PinchGestureType.CLOSE_WINDOW,
+	) {
 		this._closeType = closeType;
 		this._keyboard = getVirtualKeyboard();
 
@@ -56,18 +59,21 @@ export class CloseWindowExtension {
 
 	gestureBegin(tracker: TouchpadPinchGesture) {
 		// if we are currently in middle of animations, ignore this event
-		if (this._focusWindow)
-			return;
-		
-		this._focusWindow = global.display.get_focus_window() as Meta.Window | null;
-		if (!this._focusWindow)	return;
+		if (this._focusWindow) return;
 
-		tracker.confirmPinch(0, [CloseWindowGestureState.PINCH_IN, CloseWindowGestureState.DEFAULT], CloseWindowGestureState.DEFAULT);
+		this._focusWindow = global.display.get_focus_window() as Meta.Window | null;
+		if (!this._focusWindow) return;
+
+		tracker.confirmPinch(
+			0,
+			[CloseWindowGestureState.PINCH_IN, CloseWindowGestureState.DEFAULT],
+			CloseWindowGestureState.DEFAULT,
+		);
 
 		const frame = this._focusWindow.get_frame_rect();
 		this._preview.set_position(frame.x, frame.y);
 		this._preview.set_size(frame.width, frame.height);
-		
+
 		// animate showing widget
 		this._preview.opacity = 0;
 		this._preview.show();
@@ -106,15 +112,14 @@ export class CloseWindowExtension {
 	}
 
 	private _animatePreview(gestureCompleted: boolean, duration: number, callback?: () => void) {
-		easeActor(this._preview,  {
+		easeActor(this._preview, {
 			opacity: gestureCompleted ? END_OPACITY : 255,
 			scaleX: gestureCompleted ? END_SCALE : 1,
 			scaleY: gestureCompleted ? END_SCALE : 1,
 			duration,
 			mode: Clutter.AnimationMode.EASE_OUT_QUAD,
 			onStopped: () => {
-				if (callback)
-					callback();
+				if (callback) callback();
 				this._gestureAnimationDone();
 			},
 		});

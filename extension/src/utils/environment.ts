@@ -4,7 +4,7 @@ import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
 import St from 'gi://St';
 
-type KeysOfType<T, U> = { [P in keyof T]: T[P] extends U ? P : never; }[keyof T];
+type KeysOfType<T, U> = { [P in keyof T]: T[P] extends U ? P : never }[keyof T];
 
 type EaseParamsType<T extends GObject.Object> = {
 	duration: number;
@@ -18,6 +18,10 @@ export function easeActor<T extends Clutter.Actor>(actor: T, params: EaseParamsT
 	(actor as any).ease(params);
 }
 
-export function easeAdjustment(actor: St.Adjustment, value: number, params: EaseParamsType<St.Adjustment>): void {
+export function easeAdjustment(
+	actor: St.Adjustment,
+	value: number,
+	params: EaseParamsType<St.Adjustment>,
+): void {
 	(actor as any).ease(value, params);
 }

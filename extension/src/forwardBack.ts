@@ -61,17 +61,15 @@ export class ForwardBackGestureExtension {
 	}
 
 	destroy(): void {
-		this._connectHandlers.forEach(handle => this._swipeTracker.disconnect(handle));
+		this._connectHandlers.forEach((handle) => this._swipeTracker.disconnect(handle));
 		this._connectHandlers = [];
 		this._swipeTracker.destroy();
 		this._arrowIconAnimation.destroy();
 	}
 
-
 	_gestureBegin(tracker: SwipeTracker): void {
 		this._focusWindow = global.display.get_focus_window() as Meta.Window | null;
-		if (!this._focusWindow)
-			return;
+		if (!this._focusWindow) return;
 		this._animationState = AnimationState.WAITING;
 		tracker.confirmSwipe(
 			global.screenWidth,
@@ -134,19 +132,23 @@ export class ForwardBackGestureExtension {
 		if (progress > AnimationState.DEFAULT) {
 			this._animationState = AnimationState.RIGHT;
 			this._arrowIconAnimation.gestureBegin('arrow1-left-symbolic.svg', true);
-			this._arrowIconAnimation.set_position(workArea.x + width, workArea.y + Math.round((workArea.height - height) / 2));
-		}
-		else {
+			this._arrowIconAnimation.set_position(
+				workArea.x + width,
+				workArea.y + Math.round((workArea.height - height) / 2),
+			);
+		} else {
 			this._animationState = AnimationState.LEFT;
 			this._arrowIconAnimation.gestureBegin('arrow1-right-symbolic.svg', false);
-			this._arrowIconAnimation.set_position(workArea.x + workArea.width - 2 * width, workArea.y + Math.round((workArea.height - height) / 2));
+			this._arrowIconAnimation.set_position(
+				workArea.x + workArea.width - 2 * width,
+				workArea.y + Math.round((workArea.height - height) / 2),
+			);
 		}
 	}
 
 	_getWorkArea() {
 		const window = this._focusWindow;
-		if (window)
-			return window.get_frame_rect();
+		if (window) return window.get_frame_rect();
 		return Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.currentMonitor?.index ?? 0);
 	}
 
@@ -170,10 +172,17 @@ export class ForwardBackGestureExtension {
 				case ForwardBackKeyBinds['Audio Next/Prev']:
 					return [returnBackKey ? Clutter.KEY_AudioPrev : Clutter.KEY_AudioNext];
 				case ForwardBackKeyBinds['Tab Next/Prev']:
-					return [Clutter.KEY_Control_L, returnBackKey ? Clutter.KEY_Page_Up: Clutter.KEY_Page_Down];
+					return [
+						Clutter.KEY_Control_L,
+						returnBackKey ? Clutter.KEY_Page_Up : Clutter.KEY_Page_Down,
+					];
 			}
 		}
 		// default key bind
-		return [gestureDirection === SwipeGestureDirection.LeftToRight ? Clutter.KEY_Back : Clutter.KEY_Forward];
+		return [
+			gestureDirection === SwipeGestureDirection.LeftToRight
+				? Clutter.KEY_Back
+				: Clutter.KEY_Forward,
+		];
 	}
 }

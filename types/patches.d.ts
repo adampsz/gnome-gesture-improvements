@@ -5,11 +5,11 @@ import 'resource:///org/gnome/shell/ui/altTab.js';
 declare module 'resource:///org/gnome/shell/ui/altTab.js' {
 	module WindowSwitcherPopup {
 		interface Item extends St.Widget {
-			window: Meta.Window
+			window: Meta.Window;
 		}
 
 		interface Switcher extends St.Widget {
-			_scrollView: { hscroll: { adjustment: St.Adjustment } }
+			_scrollView: { hscroll: { adjustment: St.Adjustment } };
 		}
 	}
 
@@ -28,6 +28,6 @@ declare module 'resource:///org/gnome/shell/ui/windowManager.js' {
 
 	export interface WindowManager {
 		skipNextEffect(actor: Meta.WindowActor): void;
-	 	_workspaceAnimation: WorkspaceAnimationController
+		_workspaceAnimation: WorkspaceAnimationController;
 	}
 }

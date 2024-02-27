@@ -25,7 +25,10 @@ export const ArrowIconAnimation = GObject.registerClass(
 		private _inner_circle: Circle;
 		private _outer_circle: Circle;
 		private _arrow_icon: St.Icon;
-		private _transition?: { arrow: { from: number; end: number; }; outer_circle: { from: number; end: number; }; };
+		private _transition?: {
+			arrow: { from: number; end: number };
+			outer_circle: { from: number; end: number };
+		};
 
 		constructor() {
 			super();
@@ -57,7 +60,7 @@ export const ArrowIconAnimation = GObject.registerClass(
 			this._outer_circle.scaleX = this._transition.outer_circle.from;
 			this._outer_circle.scaleX = this._outer_circle.scaleY;
 			this._arrow_icon.opacity = 255;
-			
+
 			// animating showing widget
 			this.opacity = 0;
 			this.show();
@@ -74,8 +77,16 @@ export const ArrowIconAnimation = GObject.registerClass(
 		gestureUpdate(progress: number) {
 			if (this._transition === undefined) return;
 
-			this._arrow_icon.translationX = Util.lerp(this._transition.arrow.from, this._transition.arrow.end, progress);
-			this._outer_circle.scaleX = Util.lerp(this._transition.outer_circle.from, this._transition.outer_circle.end, progress);
+			this._arrow_icon.translationX = Util.lerp(
+				this._transition.arrow.from,
+				this._transition.arrow.end,
+				progress,
+			);
+			this._outer_circle.scaleX = Util.lerp(
+				this._transition.outer_circle.from,
+				this._transition.outer_circle.end,
+				progress,
+			);
 			this._outer_circle.scaleY = this._outer_circle.scaleX;
 		}
 
@@ -88,7 +99,11 @@ export const ArrowIconAnimation = GObject.registerClass(
 				duration,
 			});
 
-			const translationX = Util.lerp(this._transition.arrow.from, this._transition.arrow.end, progress);
+			const translationX = Util.lerp(
+				this._transition.arrow.from,
+				this._transition.arrow.end,
+				progress,
+			);
 			easeActor(this._arrow_icon, {
 				translationX,
 				duration,
@@ -103,7 +118,11 @@ export const ArrowIconAnimation = GObject.registerClass(
 				},
 			});
 
-			const scale = Util.lerp(this._transition.outer_circle.from, this._transition.outer_circle.end, progress);
+			const scale = Util.lerp(
+				this._transition.outer_circle.from,
+				this._transition.outer_circle.end,
+				progress,
+			);
 			easeActor(this._outer_circle, {
 				scaleX: scale,
 				scaleY: scale,

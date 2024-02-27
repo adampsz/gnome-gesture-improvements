@@ -9,7 +9,6 @@ import { TouchpadSwipeGesture } from './swipeTracker.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { WindowSwitcherPopup } from 'resource:///org/gnome/shell/ui/altTab.js';
 
-
 let dummyWinCount = AltTabConstants.DUMMY_WIN_COUNT;
 
 function getIndexForProgress(progress: number, nelement: number): number {
@@ -45,7 +44,7 @@ export class AltTabGestureExtension {
 		this._connectHandlers = [];
 
 		this._touchpadSwipeTracker = new TouchpadSwipeGesture(
-			(ExtSettings.DEFAULT_SESSION_WORKSPACE_GESTURE ? [4] : [3]),
+			ExtSettings.DEFAULT_SESSION_WORKSPACE_GESTURE ? [4] : [3],
 			Shell.ActionMode.ALL,
 			Clutter.Orientation.HORIZONTAL,
 			false,
@@ -61,7 +60,7 @@ export class AltTabGestureExtension {
 
 	_checkAllowedGesture(): boolean {
 		return (
-			this._extState <= AltTabExtState.DEFAULT && 
+			this._extState <= AltTabExtState.DEFAULT &&
 			Main.actionMode === Shell.ActionMode.NORMAL &&
 			!(ExtSettings.APP_GESTURES && this._touchpadSwipeTracker.isItHoldAndSwipeGesture())
 		);
@@ -70,15 +69,21 @@ export class AltTabGestureExtension {
 	apply(): void {
 		this._adjustment.connect('notify::value', this._onUpdateAdjustmentValue.bind(this));
 
-		this._connectHandlers.push(this._touchpadSwipeTracker.connect('begin', this._gestureBegin.bind(this)));
-		this._connectHandlers.push(this._touchpadSwipeTracker.connect('update', this._gestureUpdate.bind(this)));
-		this._connectHandlers.push(this._touchpadSwipeTracker.connect('end', this._gestureEnd.bind(this)));
+		this._connectHandlers.push(
+			this._touchpadSwipeTracker.connect('begin', this._gestureBegin.bind(this)),
+		);
+		this._connectHandlers.push(
+			this._touchpadSwipeTracker.connect('update', this._gestureUpdate.bind(this)),
+		);
+		this._connectHandlers.push(
+			this._touchpadSwipeTracker.connect('end', this._gestureEnd.bind(this)),
+		);
 		this._extState = AltTabExtState.DEFAULT;
 	}
 
 	destroy(): void {
 		this._extState = AltTabExtState.DISABLED;
-		this._connectHandlers.forEach(handle => this._touchpadSwipeTracker.disconnect(handle));
+		this._connectHandlers.forEach((handle) => this._touchpadSwipeTracker.disconnect(handle));
 
 		this._touchpadSwipeTracker.destroy();
 		this._connectHandlers = [];
@@ -135,8 +140,7 @@ export class AltTabGestureExtension {
 				const leftOver = AltTabConstants.MIN_WIN_COUNT - nelement;
 				if (leftOver > 0) {
 					dummyWinCount = Math.max(AltTabConstants.DUMMY_WIN_COUNT, Math.ceil(leftOver / 2));
-				}
-				else {
+				} else {
 					dummyWinCount = AltTabConstants.DUMMY_WIN_COUNT;
 				}
 
@@ -154,8 +158,7 @@ export class AltTabGestureExtension {
 					AltTabConstants.DELAY_DURATION,
 					() => {
 						Main.osdWindowManager.hideAll();
-						if (this._switcher)
-							this._switcher.opacity = 255;
+						if (this._switcher) this._switcher.opacity = 255;
 						this._adjustment.value = this._progress;
 						this._extState = AltTabExtState.ALTTAB;
 						this._altTabTimeoutId = 0;

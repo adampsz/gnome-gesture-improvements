@@ -6,6 +6,5 @@ export function printStack(message?: unknown) {
 		log(`[DEBUG]:: in function ${lines[0]} at ${lines[2]}`);
 		prefix = '\t';
 	}
-	if (message !== undefined)
-		log(`${prefix}${JSON.stringify(message)}`);
+	if (message !== undefined) log(`${prefix}${JSON.stringify(message)}`);
 }

@@ -12,7 +12,7 @@ This extension adds following features:
 • Application specific keyboard shortcut based hold-swipe gestures (e.g., navigating browser tabs)
 • Configure speed of gestures
 • Support for X11
-   
+
 On X11, you need to install https://github.com/harshadgavali/gnome-x11-gesture-daemon
 
 Report any bugs/requests on GitHub (link directly below)

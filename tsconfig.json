@@ -1,27 +1,16 @@
 {
-    "compilerOptions": {
-        "strict": true,
-        "types": [
-            "./types/patches.d.ts",
-        ],
-        "lib": [
-            "ES2022"
-        ],
-        "allowSyntheticDefaultImports": true,
-        "rootDir": "./",
-        "outDir": "./build",
-        "target": "ES2022",
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
-        "skipLibCheck": true,
-    },
-    "include": [
-        "types/global.d.ts",
-        "extension/**/*.ts",
-        "extension/**/*.js",
-        "tests/**/*.ts",
-    ],
-    "references": [
-        { "path": "./scripts/tsconfig.json" }
-    ]
+	"compilerOptions": {
+		"strict": true,
+		"types": ["./types/patches.d.ts"],
+		"lib": ["ES2022"],
+		"allowSyntheticDefaultImports": true,
+		"rootDir": "./",
+		"outDir": "./build",
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"skipLibCheck": true
+	},
+	"include": ["types/global.d.ts", "extension/**/*.ts", "extension/**/*.js", "tests/**/*.ts"],
+	"references": [{ "path": "./scripts/tsconfig.json" }]
 }

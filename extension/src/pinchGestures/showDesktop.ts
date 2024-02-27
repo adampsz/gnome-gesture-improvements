@@ -10,7 +10,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as Layout from 'resource:///org/gnome/shell/ui/layout.js';
 import { lerp } from 'resource:///org/gnome/shell/misc/util.js';
 
-// enum 
+// enum
 enum WorkspaceManagerState {
 	DEFAULT = 0,
 	SHOW_DESKTOP = 1,
@@ -24,26 +24,29 @@ enum ExtensionState {
 type Type_TouchpadPinchGesture = TouchpadPinchGesture;
 
 type CornerPositions =
-	| 'top-left' | 'top-mid' | 'top-right'
-	| 'bottom-left' | 'bottom-mid' | 'bottom-right'
-	;
+	| 'top-left'
+	| 'top-mid'
+	| 'top-right'
+	| 'bottom-left'
+	| 'bottom-mid'
+	| 'bottom-right';
 
 type Point = {
-	x: number,
-	y: number,
-}
+	x: number;
+	y: number;
+};
 
 type Corner = Point & {
 	position: CornerPositions;
-}
+};
 
 type WindowActorClone = {
-	windowActor: Meta.WindowActor,
-	clone: Clutter.Clone,
+	windowActor: Meta.WindowActor;
+	clone: Clutter.Clone;
 	translation?: {
-		start: Point,
-		end: Point,
-	},
+		start: Point;
+		end: Point;
+	};
 };
 
 type Monitor = Layout.LayoutManager['monitors'] extends Array<infer T> ? T : never;
@@ -63,12 +66,20 @@ class MonitorGroup {
 		const constraint = new Layout.MonitorConstraint({ index: monitor.index });
 		this._container.add_constraint(constraint);
 
-		this._bottomMidCorner = { x: this.monitor.width / 2, y: this.monitor.height, position: 'bottom-mid' };
+		this._bottomMidCorner = {
+			x: this.monitor.width / 2,
+			y: this.monitor.height,
+			position: 'bottom-mid',
+		};
 		this._corners = [
 			{ x: 0, y: 0, position: 'top-left' },
 			// { x: this.monitor.width / 2, y: 0, position: 'top-mid' },
 			{ x: this.monitor.width, y: 0, position: 'top-right' },
-			{ x: this.monitor.width, y: this.monitor.height, position: 'bottom-right' },
+			{
+				x: this.monitor.width,
+				y: this.monitor.height,
+				position: 'bottom-right',
+			},
 			// { x: this.monitor.width / 2, y: this.monitor.height, position: 'bottom-mid' },
 			{ x: 0, y: this.monitor.height, position: 'bottom-left' },
 		];
@@ -131,16 +142,19 @@ class MonitorGroup {
 		}
 
 		interface IMetricData {
-			value: number,
-			actorClone: WindowActorClone,
-			corner: Corner,
+			value: number;
+			actorClone: WindowActorClone;
+			corner: Corner;
 		}
 
 		const distanceMetrics: IMetricData[] = [];
-		this._corners.forEach(corner => {
-			windowActorsClones.forEach(actorClone => {
+		this._corners.forEach((corner) => {
+			windowActorsClones.forEach((actorClone) => {
 				distanceMetrics.push({
-					value: this._calculateDist(actorClone.clone, this._getDestPoint(actorClone.clone, corner)),
+					value: this._calculateDist(
+						actorClone.clone,
+						this._getDestPoint(actorClone.clone, corner),
+					),
 					actorClone,
 					corner,
 				});
@@ -152,7 +166,7 @@ class MonitorGroup {
 		const clusterSizes = new Map<CornerPositions, number>();
 		const takenActorClones = new Set<WindowActorClone>();
 		distanceMetrics.sort((a, b) => a.value - b.value);
-		distanceMetrics.forEach(metric => {
+		distanceMetrics.forEach((metric) => {
 			const size = clusterSizes.get(metric.corner.position) ?? 0;
 			if (takenActorClones.has(metric.actorClone)) return;
 			if (size >= minActorsPerCorner) {
@@ -174,11 +188,9 @@ class MonitorGroup {
 	}
 
 	gestureUpdate(progress: number) {
-
-		this._windowActorClones.forEach(actorClone => {
+		this._windowActorClones.forEach((actorClone) => {
 			const { clone, translation } = actorClone;
-			if (translation === undefined)
-				return;
+			if (translation === undefined) return;
 			clone.x = lerp(translation.start.x, translation.end.x, progress);
 			clone.y = lerp(translation.start.y, translation.end.y, progress);
 			clone.opacity = lerp(255, 128, progress);
@@ -186,7 +198,7 @@ class MonitorGroup {
 	}
 
 	gestureEnd(progress: WorkspaceManagerState, duration: number) {
-		this._windowActorClones.forEach(actorClone => {
+		this._windowActorClones.forEach((actorClone) => {
 			const { clone, translation, windowActor } = actorClone;
 			if (translation === undefined) {
 				clone.destroy();
@@ -208,8 +220,7 @@ class MonitorGroup {
 						if (progress === WorkspaceManagerState.DEFAULT) {
 							window.unminimize();
 							windowActor.show();
-						}
-						else {
+						} else {
 							window.minimize();
 							windowActor.hide();
 						}
@@ -222,8 +233,7 @@ class MonitorGroup {
 			});
 		});
 
-		if (this._windowActorClones.length === 0)
-			this._container.hide();
+		if (this._windowActorClones.length === 0) this._container.hide();
 
 		this._windowActorClones = [];
 	}
@@ -264,12 +274,18 @@ export class ShowDesktopExtension {
 		for (const monitor of Main.layoutManager.monitors)
 			this._monitorGroups.push(new MonitorGroup(monitor));
 
-		this._workspaceChangedId = global.workspaceManager.connect('active-workspace-changed', this._workspaceChanged.bind(this));
+		this._workspaceChangedId = global.workspaceManager.connect(
+			'active-workspace-changed',
+			this._workspaceChanged.bind(this),
+		);
 		this._workspaceChanged();
-		this._windowUnMinimizedId = global.windowManager.connect('unminimize', this._windowUnMinimized.bind(this));
+		this._windowUnMinimizedId = global.windowManager.connect(
+			'unminimize',
+			this._windowUnMinimized.bind(this),
+		);
 
 		this._monitorChangedId = Main.layoutManager.connect('monitors-changed', () => {
-			this._monitorGroups.forEach(m => m.destroy());
+			this._monitorGroups.forEach((m) => m.destroy());
 			this._monitorGroups = [];
 			for (const monitor of Main.layoutManager.monitors)
 				this._monitorGroups.push(new MonitorGroup(monitor));
@@ -279,25 +295,19 @@ export class ShowDesktopExtension {
 	destroy(): void {
 		this._pinchTracker?.destroy();
 
-		if (this._monitorChangedId)
-			Main.layoutManager.disconnect(this._monitorChangedId);
+		if (this._monitorChangedId) Main.layoutManager.disconnect(this._monitorChangedId);
 
-		if (this._windowAddedId)
-			this._workspace?.disconnect(this._windowAddedId);
+		if (this._windowAddedId) this._workspace?.disconnect(this._windowAddedId);
 
-		if (this._windowRemovedId)
-			this._workspace?.disconnect(this._windowRemovedId);
+		if (this._windowRemovedId) this._workspace?.disconnect(this._windowRemovedId);
 
-		if (this._workspaceChangedId)
-			global.workspaceManager.disconnect(this._workspaceChangedId);
+		if (this._workspaceChangedId) global.workspaceManager.disconnect(this._workspaceChangedId);
 
-		if (this._windowUnMinimizedId)
-			global.windowManager.disconnect(this._windowUnMinimizedId);
+		if (this._windowUnMinimizedId) global.windowManager.disconnect(this._windowUnMinimizedId);
 
 		this._resetState();
 
-		for (const monitor of this._monitorGroups)
-			monitor.destroy();
+		for (const monitor of this._monitorGroups) monitor.destroy();
 		this._monitorGroups = [];
 	}
 
@@ -305,15 +315,18 @@ export class ShowDesktopExtension {
 		if (this._workspaceManagerState === WorkspaceManagerState.DEFAULT) {
 			this._minimizingWindows = global
 				.get_window_actors()
-				.filter(a => a.visible)
+				.filter((a) => a.visible)
 				// top actors should be at the beginning
 				.reverse()
-				.map(actor => actor.metaWindow)
-				.filter(win =>
-					win.get_window_type() !== Meta.WindowType.DESKTOP &&
-					this._windows.has(win) &&
-					(win.is_always_on_all_workspaces() || win.get_workspace().index === this._workspace?.index) &&
-					!win.minimized);
+				.map((actor) => actor.metaWindow)
+				.filter(
+					(win) =>
+						win.get_window_type() !== Meta.WindowType.DESKTOP &&
+						this._windows.has(win) &&
+						(win.is_always_on_all_workspaces() ||
+							win.get_workspace().index === this._workspace?.index) &&
+						!win.minimized,
+				);
 		}
 
 		return this._minimizingWindows;
@@ -329,9 +342,12 @@ export class ShowDesktopExtension {
 
 		for (const monitor of this._monitorGroups) {
 			const windowActors = this._minimizingWindows
-				.map(win => win.get_compositor_private())
+				.map((win) => win.get_compositor_private())
 				.filter((actor: GObject.Object): actor is Meta.WindowActor => {
-					return actor instanceof Meta.WindowActor && actor.metaWindow.get_monitor() === monitor.monitor.index;
+					return (
+						actor instanceof Meta.WindowActor &&
+						actor.metaWindow.get_monitor() === monitor.monitor.index
+					);
 				});
 			monitor.gestureBegin(windowActors);
 		}
@@ -341,23 +357,19 @@ export class ShowDesktopExtension {
 			[WorkspaceManagerState.DEFAULT, WorkspaceManagerState.SHOW_DESKTOP],
 			this._workspaceManagerState,
 		);
-
 	}
 
 	gestureUpdate(_tracker: unknown, progress: number) {
 		// progress 0 -> NORMAL state, 1 -> SHOW Desktop
 		// printStack();
-		for (const monitor of this._monitorGroups)
-			monitor.gestureUpdate(progress);
+		for (const monitor of this._monitorGroups) monitor.gestureUpdate(progress);
 	}
 
 	gestureEnd(_tracker: unknown, duration: number, endProgress: number) {
 		// endProgress 0 -> NORMAL state, 1 -> SHOW Desktop
-		for (const monitor of this._monitorGroups)
-			monitor.gestureEnd(endProgress, duration);
+		for (const monitor of this._monitorGroups) monitor.gestureEnd(endProgress, duration);
 
-		if (endProgress === WorkspaceManagerState.DEFAULT)
-			this._minimizingWindows = [];
+		if (endProgress === WorkspaceManagerState.DEFAULT) this._minimizingWindows = [];
 
 		this._extensionState = ExtensionState.DEFAULT;
 		this._workspaceManagerState = endProgress;
@@ -367,9 +379,8 @@ export class ShowDesktopExtension {
 
 	private _resetState(animate = false) {
 		// reset state, aka. undo show desktop
-		this._minimizingWindows.forEach(win => {
-			if (!this._windows.has(win))
-				return;
+		this._minimizingWindows.forEach((win) => {
+			if (!this._windows.has(win)) return;
 			const onStopped = () => {
 				Main.wm.skipNextEffect(win.get_compositor_private() as Meta.WindowActor);
 				win.unminimize();
@@ -384,9 +395,7 @@ export class ShowDesktopExtension {
 					mode: Clutter.AnimationMode.EASE_OUT_QUAD,
 					onStopped,
 				});
-			}
-			else
-				onStopped();
+			} else onStopped();
 		});
 
 		this._minimizingWindows = [];
@@ -394,24 +403,24 @@ export class ShowDesktopExtension {
 	}
 
 	private _workspaceChanged() {
-		if (this._windowAddedId)
-			this._workspace?.disconnect(this._windowAddedId);
+		if (this._windowAddedId) this._workspace?.disconnect(this._windowAddedId);
 
-		if (this._windowRemovedId)
-			this._workspace?.disconnect(this._windowRemovedId);
+		if (this._windowRemovedId) this._workspace?.disconnect(this._windowRemovedId);
 
 		this._resetState(false);
 		this._windows.clear();
 		this._workspace = global.workspaceManager.get_active_workspace();
 
 		this._windowAddedId = this._workspace.connect('window-added', this._windowAdded.bind(this));
-		this._windowRemovedId = this._workspace.connect('window-removed', this._windowRemoved.bind(this));
-		this._workspace.list_windows().forEach(win => this._windowAdded(this._workspace, win));
+		this._windowRemovedId = this._workspace.connect(
+			'window-removed',
+			this._windowRemoved.bind(this),
+		);
+		this._workspace.list_windows().forEach((win) => this._windowAdded(this._workspace, win));
 	}
 
 	private _windowAdded(_workspace: unknown, window: Meta.Window) {
-		if (this._windows.has(window))
-			return;
+		if (this._windows.has(window)) return;
 
 		if (!window.skipTaskbar && this._extensionState === ExtensionState.DEFAULT)
 			this._resetState(true);
@@ -419,14 +428,12 @@ export class ShowDesktopExtension {
 	}
 
 	private _windowRemoved(_workspace: unknown, window: Meta.Window) {
-		if (!this._windows.has(window))
-			return;
+		if (!this._windows.has(window)) return;
 		this._windows.delete(window);
 	}
 
 	private _windowUnMinimized(_wm: Shell.WM, actor: Meta.WindowActor) {
-		if (actor.metaWindow.get_workspace().index !== this._workspace?.index)
-			return;
+		if (actor.metaWindow.get_workspace().index !== this._workspace?.index) return;
 
 		this._minimizingWindows = [];
 		this._workspaceManagerState = WorkspaceManagerState.DEFAULT;

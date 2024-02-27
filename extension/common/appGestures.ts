@@ -8,7 +8,7 @@ import { printStack } from './utils/logging.js';
 
 /** return icon image for give app */
 function getAppIconImage(app: Gio.AppInfo) {
-	const iconName =  app.get_icon()?.to_string() ?? 'icon-missing';
+	const iconName = app.get_icon()?.to_string() ?? 'icon-missing';
 	return new Gtk.Image({
 		gicon: Gio.icon_new_for_string(iconName),
 		iconSize: Gtk.IconSize.LARGE,
@@ -20,7 +20,7 @@ function markup_escape_text(text?: string | null) {
 	text = text ?? '';
 	try {
 		return GLib.markup_escape_text(text, -1);
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	} catch (e: any) {
 		// TODO: see what exactly is error and fix it
 		// probably errors in different language or app name
@@ -52,17 +52,14 @@ const AppChooserDialog = GObject.registerClass(
 				title: 'Select application',
 			});
 
-			this.set_default_size(
-				0.7 * parent.defaultWidth,
-				0.7 * parent.defaultHeight,
-			);
+			this.set_default_size(0.7 * parent.defaultWidth, 0.7 * parent.defaultHeight);
 
 			this._group = new Adw.PreferencesGroup();
 			const page = new Adw.PreferencesPage();
 			page.add(this._group);
 			this.add(page);
 
-			apps.forEach(app => this._addAppRow(app));
+			apps.forEach((app) => this._addAppRow(app));
 		}
 
 		/** for given app add row to selectable list */
@@ -90,7 +87,7 @@ type AppGestureSettings = [ForwardBackKeyBinds, boolean];
  * Class to create row for application in list to display gesture settings of app
  * Emits 'value-updated' when any of settings changes
  * Emits 'remove-request' when remove button is clicked
-*/
+ */
 interface AppGestureSettingsRow extends InstanceType<typeof AppGestureSettingsRow> {}
 const AppGestureSettingsRow = GObject.registerClass(
 	{
@@ -109,7 +106,7 @@ const AppGestureSettingsRow = GObject.registerClass(
 		 * @param model list of choices of keybings for setting
 		 */
 		constructor(app: Gio.AppInfo, appGestureSettings: AppGestureSettings, model: Gio.ListModel) {
-			super({ title: markup_escape_text(app.get_display_name())});
+			super({ title: markup_escape_text(app.get_display_name()) });
 			this.add_prefix(getAppIconImage(app));
 
 			const [keyBind, reverse] = appGestureSettings;
@@ -147,7 +144,6 @@ const AppGestureSettingsRow = GObject.registerClass(
 			removeButton.connect('clicked', () => this.emit('remove-request'));
 			this._keyBindCombo.connect('notify::selected', this._onValueUpdated.bind(this));
 			this._reverseButton.connect('notify::active', this._onValueUpdated.bind(this));
-
 		}
 
 		/** function called internally whenever some setting is changed, emits external signal */
@@ -183,7 +179,9 @@ const AppKeybindingGesturePrefsGroup = GObject.registerClass(
 			this._settings = settings;
 			this._appRows = new Map();
 
-			this._cachedSettings = this._settings.get_value('forward-back-application-keyboard-shortcuts').deepUnpack();
+			this._cachedSettings = this._settings
+				.get_value('forward-back-application-keyboard-shortcuts')
+				.deepUnpack();
 			this._appGestureModel = this._getAppGestureModelForComboBox();
 
 			// build ui widgets
@@ -201,11 +199,19 @@ const AppKeybindingGesturePrefsGroup = GObject.registerClass(
 			this._addAppButtonRow = this._buildAddAppButtonRow();
 			this.add(this._addAppButtonRow);
 
-			Object.keys(this._cachedSettings).sort().reverse().forEach(appId => this._addAppGestureRow(appId));
+			Object.keys(this._cachedSettings)
+				.sort()
+				.reverse()
+				.forEach((appId) => this._addAppGestureRow(appId));
 
 			// bind switch to setting value
 			const toggleSwitch = new Gtk.Switch({ valign: Gtk.Align.CENTER });
-			this._settings.bind('enable-forward-back-gesture', toggleSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
+			this._settings.bind(
+				'enable-forward-back-gesture',
+				toggleSwitch,
+				'active',
+				Gio.SettingsBindFlags.DEFAULT,
+			);
 			this.set_header_suffix(toggleSwitch);
 		}
 
@@ -217,7 +223,7 @@ const AppKeybindingGesturePrefsGroup = GObject.registerClass(
 			// find list of new apps that can be selected
 			const allApps = Gio.app_info_get_all();
 			const selectableApps = allApps
-				.filter(app => {
+				.filter((app) => {
 					const appId = app.get_id();
 					return app.should_show() && appId && !this._appRows.has(appId);
 				})
@@ -255,7 +261,7 @@ const AppKeybindingGesturePrefsGroup = GObject.registerClass(
 
 			const appRow = new AppGestureSettingsRow(
 				app,
-				this._getAppGestureSetting(appId),	// this function updates extension settings
+				this._getAppGestureSetting(appId), // this function updates extension settings
 				this._appGestureModel,
 			);
 			this._appRows.set(appId, appRow);
@@ -319,7 +325,7 @@ const AppKeybindingGesturePrefsGroup = GObject.registerClass(
 		/**
 		 * Returns application specific gesture setting
 		 * if setting is not set, returns default value and saves extension settings
-		*/
+		 */
 		private _getAppGestureSetting(appId: string): AppGestureSettings {
 			let val = this._cachedSettings[appId];
 
@@ -347,7 +353,7 @@ const AppKeybindingGesturePrefsGroup = GObject.registerClass(
 		/** Returns model which contains all possible choices for keybinding setting for app-gesture */
 		private _getAppGestureModelForComboBox() {
 			const appGestureModel = new Gtk.StringList();
-			Object.values(ForwardBackKeyBinds).forEach(val => {
+			Object.values(ForwardBackKeyBinds).forEach((val) => {
 				if (typeof val !== 'number') return;
 				appGestureModel.append(ForwardBackKeyBinds[val]);
 			});
@@ -360,7 +366,10 @@ const AppKeybindingGesturePrefsGroup = GObject.registerClass(
 /**
  * @returns preference page for application gestures
  */
-export function getAppKeybindingGesturePrefsPage(prefsWindow: Adw.PreferencesWindow, settings: GioSettings) {
+export function getAppKeybindingGesturePrefsPage(
+	prefsWindow: Adw.PreferencesWindow,
+	settings: GioSettings,
+) {
 	const page = new Adw.PreferencesPage({
 		title: 'App Gestures',
 		iconName: 'org.gnome.Settings-applications-symbolic',

@@ -6,24 +6,32 @@ import { ExtSettings, OverviewControlsState } from '../constants.js';
 import { createSwipeTracker, TouchpadSwipeGesture } from './swipeTracker.js';
 import { SyntheticEvent } from './utils/dbus.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import { SwipeTracker, TouchpadSwipeGesture as GnomeTouchpadSwipeGesture } from 'resource:///org/gnome/shell/ui/swipeTracker.js';
+import {
+	SwipeTracker,
+	TouchpadSwipeGesture as GnomeTouchpadSwipeGesture,
+} from 'resource:///org/gnome/shell/ui/swipeTracker.js';
 import { WindowManager } from 'resource:///org/gnome/shell/ui/windowManager.js';
 import { WorkspaceAnimationController } from 'resource:///org/gnome/shell/ui/workspaceAnimation.js';
 import { OverviewAdjustment } from 'resource:///org/gnome/shell/ui/overviewControls.js';
 
 interface ShallowSwipeTracker {
-	orientation: Clutter.Orientation,
-	confirmSwipe(distance: number, snapPoints: number[], currentProgress: number, cancelProgress: number): void;
+	orientation: Clutter.Orientation;
+	confirmSwipe(
+		distance: number,
+		snapPoints: number[],
+		currentProgress: number,
+		cancelProgress: number,
+	): void;
 }
 
 interface ShellSwipeTracker {
-	swipeTracker: SwipeTracker,
-	nfingers: number[],
-	disableOldGesture: boolean,
-	modes: Shell.ActionMode,
-	followNaturalScroll: boolean,
-	gestureSpeed?: number,
-	checkAllowedGesture?: (event: Clutter.Event | SyntheticEvent) => boolean
+	swipeTracker: SwipeTracker;
+	nfingers: number[];
+	disableOldGesture: boolean;
+	modes: Shell.ActionMode;
+	followNaturalScroll: boolean;
+	gestureSpeed?: number;
+	checkAllowedGesture?: (event: Clutter.Event | SyntheticEvent) => boolean;
 }
 
 function connectTouchpadEventToTracker(tracker: GnomeTouchpadSwipeGesture) {
@@ -55,7 +63,10 @@ abstract class SwipeTrackerEndPointsModifer {
 	protected abstract _gestureUpdate(tracker: SwipeTracker, progress: number): void;
 	protected abstract _gestureEnd(tracker: SwipeTracker, duration: number, progress: number): void;
 
-	protected _modifySnapPoints(tracker: SwipeTracker, callback: (tracker: ShallowSwipeTracker) => void) {
+	protected _modifySnapPoints(
+		tracker: SwipeTracker,
+		callback: (tracker: ShallowSwipeTracker) => void,
+	) {
 		const _tracker: ShallowSwipeTracker = {
 			orientation: Clutter.Orientation.HORIZONTAL,
 			confirmSwipe: (distance, snapPoints, currentProgress, cancelProgress) => {
@@ -86,7 +97,7 @@ class WorkspaceAnimationModifier extends SwipeTrackerEndPointsModifer {
 		this._workspaceAnimation = wm._workspaceAnimation;
 		this._swipeTracker = createSwipeTracker(
 			global.stage,
-			(ExtSettings.DEFAULT_SESSION_WORKSPACE_GESTURE ? [3] : [4]),
+			ExtSettings.DEFAULT_SESSION_WORKSPACE_GESTURE ? [3] : [4],
 			Shell.ActionMode.NORMAL,
 			Clutter.Orientation.HORIZONTAL,
 			ExtSettings.FOLLOW_NATURAL_SCROLL,
@@ -112,8 +123,7 @@ class WorkspaceAnimationModifier extends SwipeTrackerEndPointsModifer {
 	protected _gestureUpdate(tracker: SwipeTracker, progress: number): void {
 		if (progress < this._firstVal) {
 			progress = this._firstVal - (this._firstVal - progress) * 0.05;
-		}
-		else if (progress > this._lastVal) {
+		} else if (progress > this._lastVal) {
 			progress = this._lastVal + (progress - this._lastVal) * 0.05;
 		}
 		this._workspaceAnimation._switchWorkspaceUpdate(tracker, progress);
@@ -182,7 +192,7 @@ export class GestureExtension {
 	apply(): void {
 		this._workspaceAnimationModifier.apply();
 
-		this._swipeTrackers.forEach(entry => {
+		this._swipeTrackers.forEach((entry) => {
 			const {
 				swipeTracker,
 				nfingers,
@@ -206,7 +216,7 @@ export class GestureExtension {
 	}
 
 	destroy(): void {
-		this._swipeTrackers.reverse().forEach(entry => {
+		this._swipeTrackers.reverse().forEach((entry) => {
 			const { swipeTracker, disableOldGesture } = entry;
 			swipeTracker._touchpadGesture?.destroy();
 			swipeTracker._touchpadGesture = swipeTracker.__oldTouchpadGesture;
@@ -232,7 +242,10 @@ export class GestureExtension {
 		swipeTracker._touchpadGesture = touchpadSwipeGesture;
 		swipeTracker._touchpadGesture.connect('begin', swipeTracker._beginGesture.bind(swipeTracker));
 		swipeTracker._touchpadGesture.connect('update', swipeTracker._updateGesture.bind(swipeTracker));
-		swipeTracker._touchpadGesture.connect('end', swipeTracker._endTouchpadGesture.bind(swipeTracker));
+		swipeTracker._touchpadGesture.connect(
+			'end',
+			swipeTracker._endTouchpadGesture.bind(swipeTracker),
+		);
 		swipeTracker.bind_property('enabled', swipeTracker._touchpadGesture, 'enabled', 0);
 		swipeTracker.bind_property(
 			'orientation',

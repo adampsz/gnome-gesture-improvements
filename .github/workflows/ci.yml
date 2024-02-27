@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: ["*"]
+    branches: ['*']
 
 jobs:
   build:
@@ -46,7 +46,7 @@ jobs:
         run: echo "zipFileName=gestureImprovements.$(date --iso-8601).$(git rev-parse --short HEAD)@gestures.shell-extension.zip" >> $GITHUB_ENV
 
       - name: Upload archive artifact
-        uses: "actions/upload-artifact@v3"
+        uses: 'actions/upload-artifact@v3'
         with:
           name: ${{ env.zipFileName }}
           path: ${{ github.workspace }}/build/gestureImprovements@gestures.shell-extension.zip

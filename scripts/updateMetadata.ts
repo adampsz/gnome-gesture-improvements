@@ -3,9 +3,9 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 interface ProgramOptions {
-    inFile: string,
-    descriptionREADMEFile: string,
-    outFile?: string,
+	inFile: string;
+	descriptionREADMEFile: string;
+	outFile?: string;
 }
 
 async function readCommandLineOptions(): Promise<ProgramOptions> {
@@ -35,7 +35,7 @@ async function main() {
 	const options = await readCommandLineOptions();
 	options.outFile = options.outFile ?? options.inFile;
 
-	const metadada =  JSON.parse(fs.readFileSync(options.inFile, 'utf8'));
+	const metadada = JSON.parse(fs.readFileSync(options.inFile, 'utf8'));
 	const description = fs.readFileSync(options.descriptionREADMEFile, 'utf8');
 
 	metadada['description'] = description;
