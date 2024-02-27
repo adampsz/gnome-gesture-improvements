@@ -32,11 +32,11 @@ enum AltTabExtState {
 	ALTTAB = 3,
 }
 
-export class AltTabGestureExtension implements ISubExtension {
+export class AltTabGestureExtension {
 	private _connectHandlers: number[];
-	private _touchpadSwipeTracker: typeof TouchpadSwipeGesture.prototype;
+	private _touchpadSwipeTracker: TouchpadSwipeGesture;
 	private _adjustment: St.Adjustment;
-	private _switcher?: typeof WindowSwitcherPopup.prototype;
+	private _switcher?: WindowSwitcherPopup;
 	private _extState = AltTabExtState.DISABLED;
 	private _progress = 0;
 	private _altTabTimeoutId = 0;

@@ -20,12 +20,10 @@ enum CloseWindowGestureState {
 	DEFAULT = 0,
 }
 
-type Type_TouchpadPinchGesture = typeof TouchpadPinchGesture.prototype;
-
-export class CloseWindowExtension implements ISubExtension {
+export class CloseWindowExtension {
 	private _closeType: PinchGestureType.CLOSE_DOCUMENT | PinchGestureType.CLOSE_WINDOW;
 	private _keyboard: IVirtualKeyboard;
-	private _pinchTracker: Type_TouchpadPinchGesture;
+	private _pinchTracker: TouchpadPinchGesture;
 	private _preview: St.Widget;
 	private _focusWindow?: Meta.Window | null;
 
@@ -56,7 +54,7 @@ export class CloseWindowExtension implements ISubExtension {
 		this._preview.destroy();
 	}
 
-	gestureBegin(tracker: Type_TouchpadPinchGesture) {
+	gestureBegin(tracker: TouchpadPinchGesture) {
 		// if we are currently in middle of animations, ignore this event
 		if (this._focusWindow)
 			return;

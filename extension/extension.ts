@@ -15,7 +15,7 @@ import * as VKeyboard from './src/utils/keyboard.js';
 import { Extension, ExtensionMetadata } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 export default class extends Extension {
-	private _extensions: ISubExtension[];
+	private _extensions: { apply?: () => void, destroy: () => void }[];
 	settings?: GioSettings;
 	private _settingChangedId = 0;
 	private _reloadWaitId = 0;

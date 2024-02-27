@@ -9,8 +9,9 @@ import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 
 type IconList = 'arrow1-right-symbolic.svg' | 'arrow1-left-symbolic.svg';
 
+interface Circle extends InstanceType<typeof Circle> {}
 const Circle = GObject.registerClass(
-	class GIE_Circle extends St.Widget {
+	class Circle extends St.Widget {
 		constructor(styleClass: string) {
 			super({ styleClass: `gie-circle ${styleClass}` });
 			this.set_pivot_point(0.5, 0.5);
@@ -18,10 +19,11 @@ const Circle = GObject.registerClass(
 	},
 );
 
+export interface ArrowIconAnimation extends InstanceType<typeof ArrowIconAnimation> {}
 export const ArrowIconAnimation = GObject.registerClass(
-	class GIE_ArrowIcon extends St.Widget {
-		private _inner_circle: typeof Circle.prototype;
-		private _outer_circle: typeof Circle.prototype;
+	class ArrowIconAnimation extends St.Widget {
+		private _inner_circle: Circle;
+		private _outer_circle: Circle;
 		private _arrow_icon: St.Icon;
 		private _transition?: { arrow: { from: number; end: number; }; outer_circle: { from: number; end: number; }; };
 

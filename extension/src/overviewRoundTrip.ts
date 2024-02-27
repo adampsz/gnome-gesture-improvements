@@ -6,6 +6,7 @@ import { ExtSettings, OverviewControlsState } from '../constants.js';
 import { createSwipeTracker } from './swipeTracker.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { SwipeTracker } from 'resource:///org/gnome/shell/ui/swipeTracker.js';
+import { OverviewAdjustment, OverviewControlsManager } from 'resource:///org/gnome/shell/ui/overviewControls.js';
 
 enum ExtensionState {
 	// DISABLED = 0,
@@ -13,11 +14,11 @@ enum ExtensionState {
 	CUSTOM = 2,
 }
 
-export class OverviewRoundTripGestureExtension implements ISubExtension {
-	private _overviewControls: import('resource:///org/gnome/shell/ui/overviewControls.js').OverviewControlsManager;
-	private _stateAdjustment: import('resource:///org/gnome/shell/ui/overviewControls.js').OverviewAdjustment;
-	private _oldGetStateTransitionParams: typeof import('resource:///org/gnome/shell/ui/overviewControls.js').OverviewAdjustment.prototype.getStateTransitionParams;
-	private _swipeTracker?: typeof SwipeTracker.prototype;
+export class OverviewRoundTripGestureExtension {
+	private _overviewControls: OverviewControlsManager;
+	private _stateAdjustment: OverviewAdjustment;
+	private _oldGetStateTransitionParams: OverviewAdjustment['getStateTransitionParams'];
+	private _swipeTracker?: SwipeTracker;
 	private _progress = 0;
 	private _extensionState = ExtensionState.DEFAULT;
 	private _connectors: number[];
@@ -34,7 +35,7 @@ export class OverviewRoundTripGestureExtension implements ISubExtension {
 		this._connectors = [];
 	}
 
-	_getStateTransitionParams(): typeof import('resource:///org/gnome/shell/ui/overviewControls.js').OverviewAdjustment.prototype.getStateTransitionParams.prototype {
+	_getStateTransitionParams(): ReturnType<OverviewAdjustment['getStateTransitionParams']> | undefined {
 		if (this._extensionState <= ExtensionState.DEFAULT) {
 			return this._oldGetStateTransitionParams.call(this._stateAdjustment);
 		}
@@ -73,6 +74,7 @@ export class OverviewRoundTripGestureExtension implements ISubExtension {
 		this._connectors.push(this._swipeTracker.connect('end', this._gestureEnd.bind(this)));
 
 		// override 'getStateTransitionParams' function
+		// @ts-expect-error _getStateTransitionParams might return undefined
 		this._stateAdjustment.getStateTransitionParams = this._getStateTransitionParams.bind(this);
 
 		this._extensionState = ExtensionState.DEFAULT;
@@ -98,7 +100,7 @@ export class OverviewRoundTripGestureExtension implements ISubExtension {
 		Main.overview.disconnect(this._hiddenEventId);
 	}
 
-	_gestureBegin(tracker: typeof SwipeTracker.prototype): void {
+	_gestureBegin(tracker: SwipeTracker): void {
 		const _tracker = {
 			confirmSwipe: (distance: number, _snapPoints: number[], currentProgress: number, cancelProgress: number) => {
 				tracker.confirmSwipe(
@@ -115,7 +117,7 @@ export class OverviewRoundTripGestureExtension implements ISubExtension {
 		this._extensionState = ExtensionState.DEFAULT;
 	}
 
-	_gestureUpdate(tracker: typeof SwipeTracker.prototype, progress: number): void {
+	_gestureUpdate(tracker: SwipeTracker, progress: number): void {
 		if (progress < OverviewControlsState.HIDDEN ||
 			progress > OverviewControlsState.APP_GRID) {
 			this._extensionState = ExtensionState.CUSTOM;
@@ -129,7 +131,7 @@ export class OverviewRoundTripGestureExtension implements ISubExtension {
 		Main.overview._gestureUpdate(tracker, this._getOverviewProgressValue(progress));
 	}
 
-	_gestureEnd(tracker: typeof SwipeTracker.prototype, duration: number, endProgress: number): void {
+	_gestureEnd(tracker: SwipeTracker, duration: number, endProgress: number): void {
 		if (this._progress < OverviewControlsState.HIDDEN) {
 			this._extensionState = ExtensionState.CUSTOM;
 			endProgress = endProgress >= OverviewControlsState.HIDDEN ?

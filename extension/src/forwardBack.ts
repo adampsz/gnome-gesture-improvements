@@ -24,11 +24,11 @@ enum SwipeGestureDirection {
 
 const SnapPointThreshold = 0.1;
 
-export class ForwardBackGestureExtension implements ISubExtension {
+export class ForwardBackGestureExtension {
 	private _connectHandlers: number[];
 	private _swipeTracker: SwipeTracker;
 	private _keyboard: IVirtualKeyboard;
-	private _arrowIconAnimation: typeof ArrowIconAnimation.prototype;
+	private _arrowIconAnimation: ArrowIconAnimation;
 	private _animationState = AnimationState.WAITING;
 	private _appForwardBackKeyBinds: AppForwardBackKeyBinds;
 	private _windowTracker: Shell.WindowTracker;

@@ -21,7 +21,7 @@ enum ExtensionState {
 	ANIMATING,
 }
 
-type Type_TouchpadPinchGesture = typeof TouchpadPinchGesture.prototype;
+type Type_TouchpadPinchGesture = TouchpadPinchGesture;
 
 type CornerPositions =
 	| 'top-left' | 'top-mid' | 'top-right'
@@ -233,7 +233,7 @@ class MonitorGroup {
 	}
 }
 
-export class ShowDesktopExtension implements ISubExtension {
+export class ShowDesktopExtension {
 	private _windows = new Set<Meta.Window>();
 
 	private _workspace?: Meta.Workspace;

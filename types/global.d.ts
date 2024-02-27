@@ -3,15 +3,6 @@
 /// <reference types="@girs/gnome-shell/ambient" />
 /// <reference types="@girs/gnome-shell/extensions/global" />
 
-declare namespace __shell_private_types {
-    import GObject from 'gi://GObject';
-
-	export class TouchpadGesture extends GObject.Object {
-		destroy(): void;
-		_handleEvent(actor: Clutter.Actor | undefined, event: CustomEventType): boolean;
-	}
-}
-
 // Modules missing from `@girs/gnome-shell`
 
 declare module 'resource:///org/gnome/shell/misc/util.js' {
@@ -39,6 +30,7 @@ declare module 'resource:///org/gnome/shell/ui/overviewControls.js' {
 
 	export class OverviewAdjustment extends St.Adjustment {
 		getStateTransitionParams(): {
+			transitioning: boolean,
 			initialState: ControlsState,
 			finalState: ControlsState
 			currentState: number,
@@ -73,6 +65,11 @@ declare module 'resource:///org/gnome/shell/ui/swipeTracker.js' {
     import Shell from 'gi://Shell';
     import GObject from 'gi://GObject';
 
+	export class TouchpadSwipeGesture extends GObject.Object {
+		destroy(): void;
+		_handleEvent(actor: Clutter.Actor | undefined, event: Clutter.Event): boolean;
+	}
+
 	export class SwipeTracker extends GObject.Object {
 		constructor(config?: GObject.Object.ConstructorProperties, ...props: unknown[]);
 
@@ -83,9 +80,9 @@ declare module 'resource:///org/gnome/shell/ui/swipeTracker.js' {
 		destroy(): void;
 
 		_touchGesture?: Clutter.GestureAction;
-		_touchpadGesture?: __shell_private_types.TouchpadGesture;
+		_touchpadGesture?: TouchpadSwipeGesture;
 		// custom
-		__oldTouchpadGesture?: __shell_private_types.TouchpadGesture;
+		__oldTouchpadGesture?: TouchpadSwipeGesture;
 		//
 		_allowedModes: Shell.ActionMode;
 
@@ -117,18 +114,4 @@ declare module 'resource:///org/gnome/shell/ui/workspaceAnimation.js' {
 
 		movingWindow: Meta.Window | undefined;
 	}
-}
-
-// types
-declare type CustomEventType = Pick<
-	Clutter.Event,
-	'type' | 'get_gesture_phase' |
-	'get_touchpad_gesture_finger_count' | 'get_time' |
-	'get_coords' | 'get_gesture_motion_delta_unaccelerated' |
-	'get_gesture_pinch_scale' | 'get_gesture_pinch_angle_delta'
->;
-
-interface ISubExtension {
-	apply?(): void,
-	destroy(): void;
 }

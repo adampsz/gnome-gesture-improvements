@@ -33,6 +33,7 @@ enum GestureTileState {
 	LEFT_TILE = GestureMaxUnMaxState.MAXIMIZE,
 }
 
+interface TilePreview extends InstanceType<typeof TilePreview> {}
 const TilePreview = GObject.registerClass(
 	class TilePreview extends St.Widget {
 		private _adjustment: St.Adjustment;
@@ -271,17 +272,17 @@ const TilePreview = GObject.registerClass(
 	},
 );
 
-export class SnapWindowExtension implements ISubExtension {
-	private _swipeTracker: typeof SwipeTracker.prototype;
+export class SnapWindowExtension {
+	private _swipeTracker: SwipeTracker;
 	private _connectors: number[] = [];
-	private _tilePreview: typeof TilePreview.prototype;
-	private _touchpadSwipeGesture: typeof TouchpadSwipeGesture.prototype;
+	private _tilePreview: TilePreview;
+	private _touchpadSwipeGesture: TouchpadSwipeGesture;
 	private _toggledDirection = false;
 	private _allowChangeDirection = false;
 	private _uiGroupAddedActorId: number;
 
 	constructor() {
-		this._swipeTracker = createSwipeTracker(
+		const tracker = this._swipeTracker = createSwipeTracker(
 			global.stage,
 			(ExtSettings.DEFAULT_OVERVIEW_GESTURE ? [4] : [3]),
 			Shell.ActionMode.NORMAL,
@@ -292,7 +293,7 @@ export class SnapWindowExtension implements ISubExtension {
 		);
 
 		this._swipeTracker.allowLongSwipes = true;
-		this._touchpadSwipeGesture = this._swipeTracker._touchpadGesture as typeof TouchpadSwipeGesture.prototype;
+		this._touchpadSwipeGesture = tracker._touchpadGesture;
 		this._tilePreview = new TilePreview();
 		Main.layoutManager.uiGroup.add_child(this._tilePreview);
 		this._uiGroupAddedActorId = Main.layoutManager.uiGroup.connect('actor-added', () => {
@@ -320,7 +321,7 @@ export class SnapWindowExtension implements ISubExtension {
 		this._tilePreview.destroy();
 	}
 
-	_gestureBegin(tracker: typeof SwipeTracker.prototype, monitor: number): void {
+	_gestureBegin(tracker: SwipeTracker, monitor: number): void {
 		const window = global.display.get_focus_window() as Meta.Window | null;
 
 		// fullscreen window's can't be maximized :O

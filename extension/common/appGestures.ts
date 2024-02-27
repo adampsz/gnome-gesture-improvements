@@ -37,7 +37,7 @@ const AppChooserDialog = GObject.registerClass(
 		Properties: {},
 		Signals: { 'app-selected': { param_types: [GObject.TYPE_STRING] } },
 	},
-	class GIE_AppChooserDialog extends Adw.PreferencesWindow {
+	class AppChooserDialog extends Adw.PreferencesWindow {
 		private _group: Adw.PreferencesGroup;
 
 		/**
@@ -90,7 +90,8 @@ type AppGestureSettings = [ForwardBackKeyBinds, boolean];
  * Class to create row for application in list to display gesture settings of app
  * Emits 'value-updated' when any of settings changes
  * Emits 'remove-request' when remove button is clicked
- */
+*/
+interface AppGestureSettingsRow extends InstanceType<typeof AppGestureSettingsRow> {}
 const AppGestureSettingsRow = GObject.registerClass(
 	{
 		Properties: {},
@@ -99,7 +100,7 @@ const AppGestureSettingsRow = GObject.registerClass(
 			'remove-request': {},
 		},
 	},
-	class GIE_AppGestureSettingsRow extends Adw.ExpanderRow {
+	class AppGestureSettingsRow extends Adw.ExpanderRow {
 		private _keyBindCombo: Adw.ComboRow;
 		private _reverseButton: Gtk.Switch;
 
@@ -160,10 +161,10 @@ const AppGestureSettingsRow = GObject.registerClass(
  * Class to display list of applications and their gesture settings
  */
 const AppKeybindingGesturePrefsGroup = GObject.registerClass(
-	class GIE_AppKeybindingGesturePrefsGroup extends Adw.PreferencesGroup {
+	class AppKeybindingGesturePrefsGroup extends Adw.PreferencesGroup {
 		private _settings: GioSettings;
 		private _prefsWindow: Adw.PreferencesWindow;
-		private _appRows: Map<string, typeof AppGestureSettingsRow.prototype>;
+		private _appRows: Map<string, AppGestureSettingsRow>;
 		private _cachedSettings: Record<string, AppGestureSettings>;
 		private _addAppButtonRow: Adw.PreferencesRow;
 		private _appGestureModel: Gtk.StringList;

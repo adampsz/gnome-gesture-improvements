@@ -4,26 +4,29 @@ import Shell from 'gi://Shell';
 
 import { ExtSettings, OverviewControlsState } from '../constants.js';
 import { createSwipeTracker, TouchpadSwipeGesture } from './swipeTracker.js';
+import { SyntheticEvent } from './utils/dbus.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import { SwipeTracker, TouchpadSwipeGesture as GnomeTouchpadSwipeGesture } from 'resource:///org/gnome/shell/ui/swipeTracker.js';
+import { WindowManager } from 'resource:///org/gnome/shell/ui/windowManager.js';
+import { WorkspaceAnimationController } from 'resource:///org/gnome/shell/ui/workspaceAnimation.js';
+import { OverviewAdjustment } from 'resource:///org/gnome/shell/ui/overviewControls.js';
 
-interface ShallowSwipeTrackerT {
+interface ShallowSwipeTracker {
 	orientation: Clutter.Orientation,
 	confirmSwipe(distance: number, snapPoints: number[], currentProgress: number, cancelProgress: number): void;
 }
 
-type SwipeTrackerT = import('resource:///org/gnome/shell/ui/swipeTracker.js').SwipeTracker;
-type TouchPadSwipeTrackerT = Required<SwipeTrackerT>['_touchpadGesture'];
 interface ShellSwipeTracker {
-	swipeTracker: SwipeTrackerT,
+	swipeTracker: SwipeTracker,
 	nfingers: number[],
 	disableOldGesture: boolean,
 	modes: Shell.ActionMode,
 	followNaturalScroll: boolean,
 	gestureSpeed?: number,
-	checkAllowedGesture?: (event: CustomEventType) => boolean
+	checkAllowedGesture?: (event: Clutter.Event | SyntheticEvent) => boolean
 }
 
-function connectTouchpadEventToTracker(tracker: TouchPadSwipeTrackerT) {
+function connectTouchpadEventToTracker(tracker: GnomeTouchpadSwipeGesture) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	(global.stage as any).connectObject(
 		'captured-event::touchpad',
@@ -32,7 +35,7 @@ function connectTouchpadEventToTracker(tracker: TouchPadSwipeTrackerT) {
 	);
 }
 
-function disconnectTouchpadEventFromTracker(tracker: TouchPadSwipeTrackerT) {
+function disconnectTouchpadEventFromTracker(tracker: GnomeTouchpadSwipeGesture) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	(global.stage as any).disconnectObject(tracker);
 }
@@ -40,7 +43,7 @@ function disconnectTouchpadEventFromTracker(tracker: TouchPadSwipeTrackerT) {
 abstract class SwipeTrackerEndPointsModifer {
 	protected _firstVal = 0;
 	protected _lastVal = 0;
-	protected abstract _swipeTracker: SwipeTrackerT;
+	protected abstract _swipeTracker: SwipeTracker;
 
 	public apply(): void {
 		this._swipeTracker.connect('begin', this._gestureBegin.bind(this));
@@ -48,12 +51,12 @@ abstract class SwipeTrackerEndPointsModifer {
 		this._swipeTracker.connect('end', this._gestureEnd.bind(this));
 	}
 
-	protected abstract _gestureBegin(tracker: SwipeTrackerT, monitor: unknown): void;
-	protected abstract _gestureUpdate(tracker: SwipeTrackerT, progress: number): void;
-	protected abstract _gestureEnd(tracker: SwipeTrackerT, duration: number, progress: number): void;
+	protected abstract _gestureBegin(tracker: SwipeTracker, monitor: unknown): void;
+	protected abstract _gestureUpdate(tracker: SwipeTracker, progress: number): void;
+	protected abstract _gestureEnd(tracker: SwipeTracker, duration: number, progress: number): void;
 
-	protected _modifySnapPoints(tracker: SwipeTrackerT, callback: (tracker: ShallowSwipeTrackerT) => void) {
-		const _tracker: ShallowSwipeTrackerT = {
+	protected _modifySnapPoints(tracker: SwipeTracker, callback: (tracker: ShallowSwipeTracker) => void) {
+		const _tracker: ShallowSwipeTracker = {
 			orientation: Clutter.Orientation.HORIZONTAL,
 			confirmSwipe: (distance, snapPoints, currentProgress, cancelProgress) => {
 				this._firstVal = snapPoints[0];
@@ -75,10 +78,10 @@ abstract class SwipeTrackerEndPointsModifer {
 }
 
 class WorkspaceAnimationModifier extends SwipeTrackerEndPointsModifer {
-	private _workspaceAnimation: import('resource:///org/gnome/shell/ui/workspaceAnimation.js').WorkspaceAnimationController;
-	protected _swipeTracker: SwipeTrackerT;
+	private _workspaceAnimation: WorkspaceAnimationController;
+	protected _swipeTracker: SwipeTracker;
 
-	constructor(wm: typeof import('resource:///org/gnome/shell/ui/main.js').wm) {
+	constructor(wm: WindowManager) {
 		super();
 		this._workspaceAnimation = wm._workspaceAnimation;
 		this._swipeTracker = createSwipeTracker(
@@ -99,14 +102,14 @@ class WorkspaceAnimationModifier extends SwipeTrackerEndPointsModifer {
 		super.apply();
 	}
 
-	protected _gestureBegin(tracker: SwipeTrackerT, monitor: number): void {
+	protected _gestureBegin(tracker: SwipeTracker, monitor: number): void {
 		super._modifySnapPoints(tracker, (shallowTracker) => {
 			this._workspaceAnimation._switchWorkspaceBegin(shallowTracker, monitor);
 			tracker.orientation = shallowTracker.orientation;
 		});
 	}
 
-	protected _gestureUpdate(tracker: SwipeTrackerT, progress: number): void {
+	protected _gestureUpdate(tracker: SwipeTracker, progress: number): void {
 		if (progress < this._firstVal) {
 			progress = this._firstVal - (this._firstVal - progress) * 0.05;
 		}
@@ -116,7 +119,7 @@ class WorkspaceAnimationModifier extends SwipeTrackerEndPointsModifer {
 		this._workspaceAnimation._switchWorkspaceUpdate(tracker, progress);
 	}
 
-	protected _gestureEnd(tracker: SwipeTrackerT, duration: number, progress: number): void {
+	protected _gestureEnd(tracker: SwipeTracker, duration: number, progress: number): void {
 		progress = Math.clamp(progress, this._firstVal, this._lastVal);
 		this._workspaceAnimation._switchWorkspaceEnd(tracker, duration, progress);
 	}
@@ -132,8 +135,8 @@ class WorkspaceAnimationModifier extends SwipeTrackerEndPointsModifer {
 	}
 }
 
-export class GestureExtension implements ISubExtension {
-	private _stateAdjustment: import('resource:///org/gnome/shell/ui/overviewControls.js').OverviewAdjustment;
+export class GestureExtension {
+	private _stateAdjustment: OverviewAdjustment;
 	private _swipeTrackers: ShellSwipeTracker[];
 	private _workspaceAnimationModifier: WorkspaceAnimationModifier;
 
@@ -147,7 +150,7 @@ export class GestureExtension implements ISubExtension {
 				followNaturalScroll: ExtSettings.FOLLOW_NATURAL_SCROLL,
 				modes: Shell.ActionMode.OVERVIEW,
 				gestureSpeed: 1,
-				checkAllowedGesture: (event: CustomEventType) => {
+				checkAllowedGesture: (event: Clutter.Event | SyntheticEvent) => {
 					if (Main.overview._overview._controls._searchController.searchActive) {
 						return false;
 					}
@@ -217,8 +220,8 @@ export class GestureExtension implements ISubExtension {
 	}
 
 	_attachGestureToTracker(
-		swipeTracker: SwipeTrackerT,
-		touchpadSwipeGesture: typeof TouchpadSwipeGesture.prototype | __shell_private_types.TouchpadGesture,
+		swipeTracker: SwipeTracker,
+		touchpadSwipeGesture: TouchpadSwipeGesture,
 		disablePrevious: boolean,
 	): void {
 		if (swipeTracker._touchpadGesture && disablePrevious) {
@@ -226,7 +229,7 @@ export class GestureExtension implements ISubExtension {
 			swipeTracker.__oldTouchpadGesture = swipeTracker._touchpadGesture;
 		}
 
-		swipeTracker._touchpadGesture = touchpadSwipeGesture as __shell_private_types.TouchpadGesture;
+		swipeTracker._touchpadGesture = touchpadSwipeGesture;
 		swipeTracker._touchpadGesture.connect('begin', swipeTracker._beginGesture.bind(swipeTracker));
 		swipeTracker._touchpadGesture.connect('update', swipeTracker._updateGesture.bind(swipeTracker));
 		swipeTracker._touchpadGesture.connect('end', swipeTracker._endTouchpadGesture.bind(swipeTracker));

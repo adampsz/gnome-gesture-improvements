@@ -71,6 +71,7 @@ enum GestureACKState {
 	ACKED = 2,
 }
 
+export interface TouchpadPinchGesture extends InstanceType<typeof TouchpadPinchGesture> {}
 export const TouchpadPinchGesture = GObject.registerClass({
 	Properties: {},
 	Signals: {
@@ -83,7 +84,7 @@ export const TouchpadPinchGesture = GObject.registerClass({
 	private _allowedModes: Shell.ActionMode;
 	private _state = TouchpadState.NONE;
 	private _ackState = GestureACKState.NONE;
-	private _checkAllowedGesture?: (event: CustomEventType) => boolean;
+	private _checkAllowedGesture?: (event: Clutter.Event | DBusUtils.SyntheticEvent) => boolean;
 	private _stageCaptureEvent?: number;
 	private _historyTracker: EventHistoryTracker;
 	private _progress_scale = 1.0;
@@ -97,7 +98,7 @@ export const TouchpadPinchGesture = GObject.registerClass({
 	constructor(params: {
 		nfingers: number[],
 		allowedModes: Shell.ActionMode,
-		checkAllowedGesture?: (event: CustomEventType) => boolean,
+		checkAllowedGesture?: (event: Clutter.Event | DBusUtils.SyntheticEvent) => boolean,
 		pinchSpeed?: number,
 	}) {
 		super();
@@ -115,7 +116,7 @@ export const TouchpadPinchGesture = GObject.registerClass({
 
 	}
 
-	_handleEvent(_actor: undefined | Clutter.Actor, event: CustomEventType): boolean {
+	_handleEvent(_actor: undefined | Clutter.Actor, event: Clutter.Event | DBusUtils.SyntheticEvent): boolean {
 		if (event.type() !== Clutter.EventType.TOUCHPAD_PINCH)
 			return Clutter.EVENT_PROPAGATE;
 

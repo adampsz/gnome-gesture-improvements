@@ -6,6 +6,8 @@ import { printStack } from '../../common/utils/logging.js';
 
 import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 
+export interface SyntheticEvent extends Pick<Clutter.Event, 'type' | 'get_gesture_phase' | 'get_touchpad_gesture_finger_count' | 'get_coords' | 'get_gesture_motion_delta_unaccelerated' | 'get_time' | 'get_gesture_pinch_scale' | 'get_gesture_pinch_angle_delta'> {}
+
 const X11GestureDaemonXml = `<node>
 	<interface name="org.gestureImprovements.gestures">
 		<signal name="TouchpadSwipe">
@@ -20,6 +22,7 @@ const X11GestureDaemonXml = `<node>
 	</interface>
 </node>`;
 
+interface DBusWrapperGIExtension extends InstanceType<typeof DBusWrapperGIExtension> {}
 const DBusWrapperGIExtension = GObject.registerClass({
 	Signals: {
 		'TouchpadSwipe': {
@@ -113,7 +116,7 @@ type EventOptionalParams = Partial<{
 	is_cancelled: boolean,
 }>;
 
-function GenerateEvent(typ: Clutter.EventType, sphase: string, fingers: number, time: number, params: EventOptionalParams): CustomEventType {
+function GenerateEvent(typ: Clutter.EventType, sphase: string, fingers: number, time: number, params: EventOptionalParams): SyntheticEvent {
 	return {
 		type: () => typ,
 		get_gesture_phase: () => {
@@ -135,10 +138,10 @@ function GenerateEvent(typ: Clutter.EventType, sphase: string, fingers: number, 
 	};
 }
 
-let proxy: typeof DBusWrapperGIExtension.prototype | undefined;
+let proxy: DBusWrapperGIExtension | undefined;
 let connectedSignalIds: number[] = [];
 
-export function subscribe(callback: (actor: never | undefined, event: CustomEventType) => boolean): void {
+export function subscribe(callback: (actor: never | undefined, event: SyntheticEvent) => boolean): void {
 	if (!proxy) {
 		printStack('starting dbus service \'gesture_improvements_gesture_daemon.service\' via spawn');
 		Util.spawn(['systemctl', '--user', 'start', 'gesture_improvements_gesture_daemon.service']);
