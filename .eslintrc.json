@@ -16,25 +16,6 @@
         "@typescript-eslint"
     ],
     "rules": {
-        "indent": [
-            "error",
-            "tab",
-            {
-                "SwitchCase": 1
-            }
-        ],
-        "linebreak-style": [
-            "error",
-            "unix"
-        ],
-        "quotes": [
-            "error",
-            "single"
-        ],
-        "semi": [
-            "warn",
-            "always"
-        ],
         "no-var": "error",
         "no-unused-expressions": "error",
         "no-unused-labels": "error",
@@ -49,39 +30,6 @@
             }
         ],
         "no-empty": "error",
-        "no-mixed-spaces-and-tabs": "error",
-        "comma-dangle": [
-            "error",
-            "always-multiline"
-        ],
-        "lines-between-class-members": [
-            "error",
-            "always",
-            {
-                "exceptAfterSingleLine": true
-            }
-        ],
-        "no-multiple-empty-lines": [
-            "error",
-            {
-                "max": 2,
-                "maxEOF": 0
-            }
-        ],
-        "object-curly-newline": [
-            "error",
-            {
-                "multiline": true
-            }
-        ],
-        "function-call-argument-newline": [
-            "error",
-            "consistent"
-        ],
-        "function-paren-newline": [
-            "error",
-            "multiline-arguments"
-        ],
         "eqeqeq": "error"
     },
     "overrides": [
@@ -104,31 +52,7 @@
                 "no-var": "off",
                 "@typescript-eslint/no-unused-vars": "off",
                 "@typescript-eslint/explicit-module-boundary-types": "off",
-                "no-unused-expressions": "off",
-                "no-mixed-spaces-and-tabs": "off",
-                "comma-dangle": "off",
-                "no-multiple-empty-lines": ["error", { "max": 1 }],
-                "padding-line-between-statements": [
-                    "error",
-                    { "blankLine": "always", "prev": "*", "next": ["function", "multiline-var"] },
-                    {
-                        "blankLine": "always", 
-                        "prev": [
-                            "function", "multiline-const", 
-                            "multiline-var", "multiline-let",
-                            "multiline-expression", "multiline-block-like"
-                        ],
-                        "next": "*"
-                    }
-                ],
-                "lines-around-comment": [
-                    "error",
-                    {
-                        "beforeBlockComment": true,
-                        "beforeLineComment": true,
-                        "allowBlockStart": true
-                    }
-                ]
+                "no-unused-expressions": "off"
             }
         },
         {

@@ -6,11 +6,13 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "fmt:extension": "prettier extension scripts tests types --check",
+    "fmt:package": "prettier build --ignore-path none --write",
     "lint:extension": "eslint extension scripts tests",
     "lint:package": "eslint build --fix",
     "transpile:watch": "tsc --build --watch",
-    "transpile": "npm run lint:extension && tsc --build",
-    "build": "npm run clean && npm run transpile && npm run lint:package",
+    "transpile": "npm run npm run lint:extension && tsc --build",
+    "build": "npm run clean && npm run transpile && npm run fmt:package && npm run lint:package",
     "clean": "rm -rf build && mkdir build",
     "pack": "npm run build && make pack",
     "update": "npm run pack && make update"
@@ -33,6 +35,7 @@
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
     "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
   },
   "dependencies": {
