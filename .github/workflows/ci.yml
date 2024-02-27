@@ -26,17 +26,16 @@ jobs:
 
       - name: Lint Source
         run: |
-          npm run clean
-          npm run lint:extension
+          npm run fmt:extension && npm run lint:extension
 
       - name: Build
         run: |
-          tsc
-          node build/scripts/transpile.js
+          npm run clean
+          tsc --build
 
       - name: Lint package
         run: |
-          npm run lint:package
+          npm run fmt:package && npm run lint:package
 
       - name: Create archive artifact
         run: |

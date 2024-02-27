@@ -27,4 +27,4 @@ jobs:
       - name: Lint Source
         run: |
           npm run clean
-          npm run lint:extension
+          npm run fmt:extension && npm run lint:extension
